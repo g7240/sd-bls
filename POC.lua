@@ -33,7 +33,8 @@
 G1 = ECP.generator()
 G2 = ECP2.generator()
 -- H =  hash to point function to ECP1
-H = ECP.hashtopoint
+HG1 = ECP.hashtopoint
+
 function keygen()
 -- δ = r.O
 -- γ = δ.G2
@@ -43,13 +44,13 @@ function keygen()
 end
 function sign(sk, msg)
 -- σ = δ * ( H(m)*G1 )
-   return H(msg) * sk
+   return HG1(msg) * sk
 end
 
 function verify(pk, msg, sig)
 -- e(γ,H(m)) == e(G2,σ)
    return(
-	  PAIR.ate(pk, H(msg))
+	  PAIR.ate(pk, HG1(msg))
 	  == PAIR.ate(G2, sig)
    )
 end
@@ -88,11 +89,11 @@ CLAIMS = { name = "Pasqualino",
 S_CLAIMS = { }
 A_REVOKES = { }
 for k,v in pairs(CLAIMS) do
-   local rev = keygen()
+   local rev = BIG.random()
    local id = k..'='..v
-   local sig = sign(A.sk, id) + sign(rev.sk, id)
-   S_CLAIMS[id] = { sig, rev.pk }
-   A_REVOKES['HolderID/'..id] = rev.sk
+   local sig = sign(A.sk, id) + sign(rev, id)
+   S_CLAIMS[id] = { sig, G1 * rev, G2 * rev, rev }
+   A_REVOKES['HolderID/'..id] = rev
 end
 
 I.warn({ Revocations = A_REVOKES })
@@ -100,17 +101,27 @@ I.warn({ Revocations = A_REVOKES })
 -- holder discloses 3 credentials
 disclose = { 'name', 'gender', 'above_18' }
 SD_CLAIMS = { }
-sha256 = HASH.new'sha256'
-eph = keygen()
+sha256 = HASH.new('sha256')
+local tri
 for m,v in pairs(S_CLAIMS) do
   local sig = v[1] -- naked issuer's sig
-  local revpk = v[2]
+  local revG1 = v[2]
+  local revG2 = v[3]
+--  local rev = v[4] -- temp for test DELETE ME
   local claim = strtok(m, '=')
+  local er = BIG.random()
+  tri = BIG.new(sha256:process(
+                  (PAIR.ate(A.pk, revG1) ^ er):octet()
+  ))
+  -- assert(tri == BIG.new(sha256:process(
+  --                        (PAIR.ate(A.pk, G1*er)^rev):octet()
+  -- )))
   if array_contains(disclose, claim[1]) then
 	  table.insert(SD_CLAIMS, {
                    id = m,
-                   s = sig + sign(eph.sk, m),
-                   p = (revpk + eph.pk):to_zcash()
+                   s = sig + sign(tri, m),
+                   p = (revG2 + G2*tri):to_zcash(),
+                   r = G1*er
     })
   end
 end
@@ -125,9 +136,13 @@ function revocation_contains(revocations, claim)
   local rs
   local res   = false -- store here result for constant time operations
   for _,rev in pairs(revocations) do
-    local rsk = rev
-    local tri = (PAIR.ate(A.pk, H(claim)) ^ rsk):octet()
-    if H(tri) == rev[2] then
+    local eph = BIG.new(sha256:process(
+                          (PAIR.ate(A.pk,claim.r)^rev):octet()
+    ))
+    I.warn({tri=tri,
+            eph=eph,
+            claim=claim})
+    if ECP2.from_zcash(claim.p) - (G2*eph) - G2*rev == A.pk then
       res = true
     end
   end
@@ -135,7 +150,7 @@ function revocation_contains(revocations, claim)
 end
 
 local revocations = { A_REVOKES['HolderID/born_in=Napoli'],
---                      A_REVOKES['HolderID/gender=male'],
+                      A_REVOKES['HolderID/gender=male'],
                       A_REVOKES['HolderID/nationality=italian'] }
 
 -- relying party verifies credentials
@@ -143,6 +158,6 @@ local revocations = { A_REVOKES['HolderID/born_in=Napoli'],
 for _,claim in pairs(SD_CLAIMS) do
    local sig = claim.s
    local pk = ECP2.from_zcash(claim.p)
-   assert(not revocation_contains(revocations, claim.id), "Revoked: "..claim.id)
+   assert(not revocation_contains(revocations, claim), "Revoked: "..claim.id)
    assert( verify(pk + A.pk, claim.id, sig) )
 end
