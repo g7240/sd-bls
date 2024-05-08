@@ -70,10 +70,11 @@ local f = sign(F.sk, m)
 local g = sign(G.sk, m)
 s = d + e + f + g
 p = D.pk + E.pk + F.pk + G.pk
-assert( I.spy(verify(p, m, s)))
+assert( verify(p, m, s))
 
--- Issuer's keyring
-A = keygen()
+-- Issuer's keyring hardcoded 0x0 seed
+A = {sk = BIG.new(sha256(OCTET.zero(32)))}
+A.pk = G2*A.sk
 
 -- Holder sends claims to issuer and proves them
 CLAIMS = { name = "Pasqualino",
@@ -96,7 +97,7 @@ for k,v in pairs(CLAIMS) do
    A_REVOKES['HolderID/'..id] = rev
 end
 
-I.warn({ Revocations = A_REVOKES })
+--I.warn({ Revocations = A_REVOKES })
 --         SignedClaims = S_CLAIMS })
 -- holder discloses 3 credentials
 disclose = { 'name', 'gender', 'above_18' }
@@ -110,7 +111,7 @@ for m,v in pairs(S_CLAIMS) do
 --  local rev = v[4] -- temp for test DELETE ME
   local claim = strtok(m, '=')
   local er = BIG.random()
-  tri = BIG.new(sha256:process(
+  local tri = BIG.new(sha256:process(
                   (PAIR.ate(A.pk, revG1) ^ er):octet()
   ))
   -- assert(tri == BIG.new(sha256:process(
@@ -135,23 +136,27 @@ print(JSON.encode({
 function revocation_contains(revocations, claim)
   local rs
   local res   = false -- store here result for constant time operations
-  for _,rev in pairs(revocations) do
-    local eph = BIG.new(sha256:process(
+  local rev = revocations[claim.id]
+  if rev then
+    local tri = BIG.new(sha256:process(
                           (PAIR.ate(A.pk,claim.r)^rev):octet()
     ))
-    I.warn({tri=tri,
-            eph=eph,
-            claim=claim})
-    if ECP2.from_zcash(claim.p) - (G2*eph) - G2*rev == A.pk then
+    if ECP2.from_zcash(claim.p) - (G2*tri) == G2*rev then
       res = true
     end
   end
   return res
 end
 
-local revocations = { A_REVOKES['HolderID/born_in=Napoli'],
-                      A_REVOKES['HolderID/gender=male'],
-                      A_REVOKES['HolderID/nationality=italian'] }
+local torevoke = {
+  'HolderID/born_in=Napoli',
+  'HolderID/gender=male',
+  'HolderID/nationality=italian'}
+local revocations = {}
+for _,v in pairs(torevoke) do
+  local k = strtok(v,'/')[2]
+  revocations[k] = A_REVOKES[v]
+end
 
 -- relying party verifies credentials
 -- downloads PK of IssuerID from DID
