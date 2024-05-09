@@ -7,6 +7,8 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
+%% \usepackage{natbib}
+
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
@@ -34,7 +36,7 @@ andrea@forkbomb.eu}
 \maketitle
 
 \begin{abstract}
-We believe that, when developing digital identities systems, it is of critical importance to design algorithms that ensure the privacy of private citizens as well protect them from possible corruption of issuers. This study introduces an innovative method for unlinkable selective disclosure and revocation of digital credentials, utilizing the unique homomorphic characteristics of the Boneh-Lynn-Shacham (BLS) signatures. Our approach ensures that users can selectively reveal only the necessary attributes, while protecting their privacy across multiple presentations. We also want to protect users from issuer corruption, so we apply a threshold for credential issuance and revocation to mandate a collective agreement among multiple issuers, ensuring that actions such as signature validation and revocation are executed only with consensus.
+It is of critical importance to design digital identity systems that ensure the privacy of citizens as well protect them from state corruption as the identity issuer. Unfortunately what is currently developed in Europe and USA is does not offer such basic protections. As a solution we introduce a method for unlinkable selective disclosure and privacy preserving revocation of digital credentials, utilizing the unique homomorphic characteristics 2nd order Elliptic Curves and Boneh-Lynn-Shacham (BLS) signatures operated on them. Our approach ensures that users can selectively reveal only the necessary attributes, while protecting their privacy across multiple presentations and against colluding verifiers. Since we also want to protect users from issuer corruption, we apply a threshold for credential issuance and revocation to mandate a collective agreement among multiple issuers. At last our method of revocation does not give out any information on the identity of holders of revoked credentials.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -46,7 +48,7 @@ Digital identity systems implement credential issuance and presentation mechanis
 
 Such systems are known as selective disclosure and this article aims at improving their cryptographic implementation to adhere to basic privacy-by-design standards.
 
-\section{Selective Disclosures Today}
+\subsection{State of the art}
 
 Selective disclosures are being used by nation states across the world in their next generation identity systems, for instance EIDAS2.0 in Europe where the European Digital Identity Wallet Architecture and Reference Framework mandates the use of the SD-JWT standard. Unfortunately the only SD-JWT implementation known and found in identity wallet implementations today adopts simple HMAC based cryptography to generate proofs.
 
@@ -54,11 +56,11 @@ In North America the situation seems to be different: the cryptography adopted i
 
 The different choice of syntax in these two approaches is negligible, being Javascript Web Tokens of W3C Verifiable Credentials doesn't changes much from our point of view. But the cryptographic algorithms adopted have great importance for our purpose and they lack the features necessary to face three important threats which render them unsuitable to be used in real world situations.
 
-\section{Main Threats Considered}
+\subsection{Threats considered}
 
 \paragraph{Linkability}
 
-Every presentation of an HMAC proof is identical and this makes it possible for an eavesdropper to trace an holder identity by following disclosures. In order to preserve the privacy of a credential holder the proofs disclosed by the wallet should not be traceable across different presentations. This threat appears to be well mitigated by BBS+ through its Zero Knowledge Proof implementation.
+Every presentation of an HMAC proof is identical and this makes it possible for colluding verifiers to trace an holder identity by following disclosures. In order to preserve the privacy of a credential holder the proofs disclosed by the wallet should not be traceable across different presentations. This threat appears to be well mitigated by BBS+ through its Zero Knowledge Proof implementation.
 
 \paragraph{Lack of Revocation}
 
@@ -72,40 +74,36 @@ There is no revocation system designed, either for HMAC or BBS+. This may be mit
 
 If the choice of interactive revocation is left to a single issuer, one may unilaterally choose to revoke credentials, without being subject to revision or having to seek consensus with a quorum of issuers. This situation leads to censorship and persecution of engaged individuals like journalists or activists living under dictatorial regimes that may arbitrarily revoke their credentials or even ID cards and passports.
 
-\pagebreak
+\section{Overview}
 
-\section*{References}
 
-Please number citations consecutively within brackets \cite{b1}. The
-sentence punctuation follows the bracket \cite{b2}. Refer simply to the reference
-number, as in \cite{b3}---do not use ``Ref. \cite{b3}'' or ``reference \cite{b3}'' except at
-the beginning of a sentence: ``Reference \cite{b3} was the first $\ldots$''
+\section{Implementation}
 
-Number footnotes separately in superscripts. Place the actual footnote at
-the bottom of the column in which it was cited. Do not put footnotes in the
-abstract or reference list. Use letters for table footnotes.
+In this section we will provide a detailed description of the algorithm we propose for Selective Disclosure using BLS signatures (SD-BLS).
 
-Unless there are six authors or more give all authors' names; do not use
-``et al.''. Papers that have not been published, even if they have been
-submitted for publication, should be cited as ``unpublished'' \cite{b4}. Papers
-that have been accepted for publication should be cited as ``in press'' \cite{b5}.
-Capitalize only the first word in a paper title, except for proper nouns and
-element symbols.
+\subsection{Notations and assumptions}
 
-For papers published in translation journals, please give the English
-citation first, followed by the original foreign-language citation \cite{b6}.
+We will adopt the following notations:
+\begin{itemize}
+    \item $\mathbb{F}_p$ is the prime finite field with $p$ elements (i.e. of prime order $p$); % In our case the prime is long 383 bits;
+    \item $E$ denotes the (additive) group of points of the curve BLS-381-12 \cite{bls381-12} which can be described with the Weierstrass form  $y^2=x^3 + 16$;
+    \item $E_T$ represents instead the group of points of the twisted curve of BLS-383, with embedding degree $k=12$. The order of this group is the same of that of $E$;
+\end{itemize}
+We also require defining the notion of a cryptographic pairing. Basically it is a function $e: \mathbb{G}_1\times\mathbb{G}_2\to \mathbb{G}_T$, where $\mathbb{G}_1,\mathbb{G}_2$ and $\mathbb{G}_T$ are all groups of same order $n$, such that satisfies the following properties:
+\begin{itemize}
+    \item [i.] \emph{Bilinearity}, i.e. given $P_1,Q_1\in\mathbb{G}_1$ and $P_2,Q_2\in\mathbb{G}_2$, we have
+%    \item [i.] \emph{Bilinearity}, i.e. given $P,Q\in\mathbb{G}_1$ and $R,S\in\mathbb{G}_2$, we have
+    \begin{align*}
+        e(P_1+Q_1,P_2) = e(P_1,P_2)\cdot e(Q_1,P_2) \\
+        e(P_1,P_2+Q_2) = e(P_1,P_2)\cdot e(P_1,Q_2)
+    \end{align*}
+    \item[ii.] \emph{Non-degeneracy}, meaning that for all $g_1\in\mathbb{G}_1, g_2\in\mathbb{G}_2$, $e(g_1,g_2)\ne 1_{\mathbb{G}_T}$, the identity element of the group $\mathbb{G}_T$;
+    \item[iii.] \emph{ Efficiency}, so that the map $e$ is easy to compute;
+    \item[iv. ] $\mathbb{G}_1\ne \mathbb{G}_2$, and moreover, that there exist no efficient homomorphism between $\mathbb{G}_1$ and $\mathbb{G}_2$.
+\end{itemize}
+For the purpose of our protocol we will have $\mathbb{G}_1 = E_T$ and $\mathbb{G}_2 = E$, and $\mathbb{G}_T\subset \mathbb{F}_{p^{12}}$ is the subgroup containing the $n$-th roots of unity, where $n$ is the order of the groups $E$ and $E_T$. Instead $e: E_T  \times E\to \mathbb{G}_T$ is the \emph{Miller pairing}, which in our work is encoded as the method \verb!miller(ECP2 P, ECP Q)!. \\
 
-\begin{thebibliography}{00}
-\bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
-\bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
-\bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
-\bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
-\bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
-\bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
-\bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.
-\end{thebibliography}
-\vspace{12pt}
-\color{red}
-IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
+\bibliographystyle{IEEEtran}
+\bibliography{references}
 
 \end{document}
