@@ -1,6 +1,7 @@
 \documentclass[conference]{IEEEtran}
 % \IEEEoverridecommandlockouts
 % The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
@@ -8,6 +9,29 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 %% \usepackage{natbib}
+
+\usepackage{listings}
+\lstdefinestyle{lua}{
+  language=[5.3]Lua,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{magenta},
+  stringstyle=\color{blue},
+  commentstyle=\color{black!50}
+}
+% solarized
+\lstset{
+    % How/what to match
+    sensitive=false,
+    % Extra margin on line (align with paragraph)
+    xleftmargin=\parindent,
+    % Put extra space under caption
+    belowcaptionskip=1\baselineskip,
+    % Break long lines into multiple lines?
+    breaklines=true,
+    % Show a character for spaces?
+    showstringspaces=false,
+    tabsize=2
+}
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -98,7 +122,19 @@ If the choice of interactive revocation is left to a single issuer, one may unil
 
 \section{Implementation}
 
-In this section we will provide a detailed description of the algorithm we propose for Selective Disclosure using BLS signatures (SD-BLS).
+In this section we will provide a detailed description of the
+algorithm we propose for Selective Disclosure using BLS signatures
+(SD-BLS).
+
+We use both the classical mathematical notation and a reference code
+implementation that is a dialect of Lua syntax and works efficiently
+in the Zenroom VM. Being a self-contained application written in C,
+Zenroom can be built for several CPU architectures and operative
+systems, both as command line interface (CLI) application and as a
+library. The Zenroom VM executes a Lua dialect allowing to follow very
+closely the mathematical formulation of algorithms we show in this
+article: it is free and open source software that is published and
+documented on Zenroom.org
 
 \subsection{Notations and assumptions}
 
@@ -122,8 +158,106 @@ We also require defining the notion of a cryptographic pairing. Basically it is 
 \end{itemize}
 For the purpose of our protocol we will have $\mathbb{G}_1 = E_T$ and $\mathbb{G}_2 = E$, and $\mathbb{G}_T\subset \mathbb{F}_{p^{12}}$ is the subgroup containing the $n$-th roots of unity, where $n$ is the order of the groups $E$ and $E_T$. Instead $e: E_T  \times E\to \mathbb{G}_T$ is the \emph{Miller pairing}, which in our work is encoded as the method \verb!miller(ECP2 P, ECP Q)!. \\
 
+The following code implements this setup in Zenroom
+\begin{lstlisting}[style=lua,caption={Setup}]
+G1 = ECP.generator()
+G2 = ECP2.generator()
+HG1 = ECP.hashtopoint
+Miller = PAIR.ate
+\end{lstlisting}
+
+
 \subsection{Issuance}
+
+\begin{lstlisting}[style=lua,caption={Issuer key generation}]
+G1 = ECP.generator()
+G2 = ECP2.generator()
+HG1 = ECP.hashtopoint
+function keygen()
+   local sk = INT.random()
+   return { sk = sk,
+			pk = G2 * sk }
+end
+\end{lstlisting}
+
+\begin{lstlisting}[style=lua,caption={Issuer signature}]
+function sign(sk, msg)
+   return HG1(msg) * sk
+end
+\end{lstlisting}
+
+As a convention we assume that claims are simple strings assigning a
+value to a key using equals.
+
+\begin{lstlisting}[style=lua,caption={Holder requests signature of claims}]
+CLAIMS = {
+  name = "Pasqualino",
+  surname = "Frafuso",
+  nickname = "Settebellezze",
+  born_in = "Napoli",
+  gender = "male",
+  above_18 = 'true',
+  nationality = "italian"
+}
+\end{lstlisting}
+
+Upon verification of claims, the issuer can send back them signed:
+
+\begin{lstlisting}[style=lua,caption={Issuer signs claims}]
+SIGNED_CLAIMS = { }
+REVOCATIONS = { }
+for k,v in pairs(CLAIMS) do
+
+-- create the revocation key
+   local rev = BIG.random()
+   local id = k..'='..v
+   local sig = sign(A.sk, id)
+
+-- add the revocation signature
+   + sign(rev, id)
+
+-- send signed claims to holder
+   SIGNED_CLAIMS[id] = {
+     sig,      -- pos 1
+     G1 * rev, -- pos 2
+     G2 * rev, -- pos 3
+   }
+
+-- save revocation in issuer DB
+   REVOCATIONS['HolderID/'..id] = rev
+end
+\end{lstlisting}
+
 \subsection{Presentation}
+
+
+\begin{lstlisting}[style=lua,caption={Holder presents credentials}]
+-- select credentials to disclose
+disclose={'name','gender','above_18'}
+PRESENTED_CLAIMS = { }
+sha256 = HASH.new('sha256')
+for m,v in pairs(SIGNED_CLAIMS) do
+  local sig   = v[1]
+  local revG1 = v[2]
+  local revG2 = v[3]
+  local claim = strtok(m, '=')
+-- generate a blinding factor
+  local er = BIG.random()
+-- bind it to the revocation key
+  local tri = BIG.new(sha256:process(
+  (PAIR.ate(A.pk, revG1) ^ er):octet()
+  ))
+  if array_contains(disclose, claim[1]) then
+	table.insert(PRESENTED_CLAIMS, {
+    id = m,
+    s = sig + sign(tri, m),
+    p = (revG2 + G2*tri):to_zcash(),
+    r = G1*er
+  })
+  end
+end
+\end{lstlisting}
+
 \subsection{Verification}
 \subsection{Revocation}
 \subsection{Security considerations}

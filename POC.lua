@@ -61,34 +61,35 @@ A = {sk = BIG.new(sha256(OCTET.zero(32)))}
 A.pk = G2*A.sk
 
 -- Holder sends claims to issuer and proves them
-CLAIMS = { name = "Pasqualino",
-		   surname = "Frafuso",
-		   nickname = "Settebellezze",
-		   born_in = "Napoli",
-		   gender = "male",
-		   above_18 = 'true',
-		   nationality = "italian"
+CLAIMS = {
+  name = "Pasqualino",
+  surname = "Frafuso",
+  nickname = "Settebellezze",
+  born_in = "Napoli",
+  gender = "male",
+  above_18 = 'true',
+  nationality = "italian"
 }
 
 -- Issuer signs claims
-S_CLAIMS = { }
-A_REVOKES = { }
+SIGNED_CLAIMS = { }
+REVOCATIONS = { }
 for k,v in pairs(CLAIMS) do
    local rev = BIG.random()
    local id = k..'='..v
    local sig = sign(A.sk, id) + sign(rev, id)
-   S_CLAIMS[id] = { sig, G1 * rev, G2 * rev, rev }
-   A_REVOKES['HolderID/'..id] = rev
+   SIGNED_CLAIMS[id] = { sig, G1 * rev, G2 * rev, rev }
+   REVOCATIONS['HolderID/'..id] = rev
 end
 
 --I.warn({ Revocations = A_REVOKES })
 --         SignedClaims = S_CLAIMS })
 -- holder discloses 3 credentials
 disclose = { 'name', 'gender', 'above_18' }
-SD_CLAIMS = { }
+PRESENTED_CLAIMS = { }
 sha256 = HASH.new('sha256')
 local tri
-for m,v in pairs(S_CLAIMS) do
+for m,v in pairs(SIGNED_CLAIMS) do
   local sig = v[1] -- naked issuer's sig
   local revG1 = v[2]
   local revG2 = v[3]
@@ -102,7 +103,7 @@ for m,v in pairs(S_CLAIMS) do
   --                        (PAIR.ate(A.pk, G1*er)^rev):octet()
   -- )))
   if array_contains(disclose, claim[1]) then
-	  table.insert(SD_CLAIMS, {
+	  table.insert(PRESENTED_CLAIMS, {
                    id = m,
                    s = sig + sign(tri, m),
                    p = (revG2 + G2*tri):to_zcash(),
@@ -113,7 +114,7 @@ end
 
 -- show encoded claims example
 print(JSON.encode({
-          claims = SD_CLAIMS,
+          claims = PRESENTED_CLAIMS,
           verifier = 'IssuerID'
 }))
 
@@ -134,17 +135,17 @@ end
 
 local torevoke = {
   'HolderID/born_in=Napoli',
-  'HolderID/gender=male',
+--  'HolderID/gender=male',
   'HolderID/nationality=italian'}
 local revocations = {}
 for _,v in pairs(torevoke) do
   local k = strtok(v,'/')[2]
-  revocations[k] = A_REVOKES[v]
+  revocations[k] = REVOCATIONS[v]
 end
 
 -- relying party verifies credentials
 -- downloads PK of IssuerID from DID
-for _,claim in pairs(SD_CLAIMS) do
+for _,claim in pairs(PRESENTED_CLAIMS) do
    local sig = claim.s
    local pk = ECP2.from_zcash(claim.p)
    assert(not revocation_contains(revocations, claim), "Revoked: "..claim.id)
