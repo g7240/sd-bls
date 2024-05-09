@@ -92,21 +92,21 @@ andrea@forkbomb.eu}
 \begin{abstract}
 
 It is of critical importance to design digital identity systems that
-ensure the privacy of citizens as well protect them from state
-corruption as the identity issuer. Unfortunately, what Europe and USA
-state organizations are currently developing does not offer such basic
-protections. As a solution we introduce a method for untraceable
-selective disclosure and privacy preserving revocation of digital
-credentials, utilizing the unique homomorphic characteristics of
-second order Elliptic Curves and Boneh-Lynn-Shacham (BLS) signatures
-operated on them. Our approach ensures that users can selectively
-reveal only the necessary attributes, while protecting their privacy
-across multiple presentations and against colluding verifiers. Since
-we also want to protect users from issuer corruption, we apply a
-threshold for credential issuance and revocation to mandate a
-collective agreement among multiple issuers. Finally, our method of
-revocation does not give out any information on the identity of
-holders of revoked credentials.
+ensure the privacy of citizens as well protect them from issuer
+corruption. Unfortunately, what Europe and USA public sector is
+currently developing does not offer such basic protections. As a
+solution we introduce a method for untraceable selective disclosure
+and privacy preserving revocation of digital credentials, utilizing
+the unique homomorphic characteristics of second order Elliptic Curves
+and Boneh-Lynn-Shacham (BLS) signatures operated on them. Our approach
+ensures that users can selectively reveal only the necessary
+attributes, while protecting their privacy across multiple
+presentations and against colluding verifiers. Since we also want to
+protect users from issuer corruption, we apply a threshold for
+credential issuance and revocation to mandate a collective agreement
+among multiple issuers. Finally, our method of revocation does not
+give out any information on the identity of holders of revoked
+credentials.
 
 \end{abstract}
 
@@ -121,21 +121,21 @@ Such systems are known as selective disclosure and this article aims at improvin
 
 \subsection{State of the art}
 
-Selective disclosures are being used by nation states across the world in their next generation identity systems, for instance EIDAS2.0 in Europe where the European Digital Identity Wallet Architecture and Reference Framework mandates the use of the SD-JWT standard. Unfortunately the only SD-JWT implementation known and found in identity wallet implementations today adopts simple HMAC based cryptography to generate proofs.
+Selective disclosures are being used by nation states across the world in their next generation identity systems, for instance EIDAS2.0 in Europe where the European Digital Identity Wallet Architecture and Reference Framework\cite{eudi-arf} mandates the use of SD-JWT\cite{sd-jwt}. Unfortunately SD-JWT adopts simple HMAC based cryptography to generate proofs that can be traced.
 
-In North America the situation seems to be different: the cryptography adopted is based on the BBS+ algorithm and applied to W3C Verifiable Credentials to obtain an higher degree of privacy.
+In North America the situation seems to be slightly different: the cryptography adopted is based on the BBS+ algorithm\cite{bbs+} leveraging its Zero Knowledge Proof properties and applied to W3C Verifiable Credentials\cite{w3c-vc} to obtain an higher degree of privacy.
 
-The different choice of syntax in these two approaches is negligible, being Javascript Web Tokens of W3C Verifiable Credentials doesn't changes much from our point of view. But the cryptographic algorithms adopted have great importance for our purpose and they lack the features necessary to face three important threats which render them unsuitable to be used in real world situations.
+The different choice of syntax in these two approaches is negligible, being Javascript Web Tokens or W3C Verifiable Credentials doesn't changes much from our point of view. But the cryptographic algorithms adopted have great importance for our purpose and they lack the features necessary to face three important threats which render them unsuitable to be used in real world situations.
 
 \subsection{Threats considered}
 
 \paragraph{Linkability}
 
-Every presentation of an HMAC proof is identical and this makes it possible for colluding verifiers to trace an holder identity by following disclosures. In order to preserve the privacy of a credential holder the proofs disclosed by the wallet should not be traceable across different presentations. This threat appears to be well mitigated by BBS+ through its Zero Knowledge Proof implementation.
+Every presentation of an HMAC proof in SD-JWT is identical and this makes it possible for colluding verifiers to trace an holder identity by following disclosures. In order to preserve the privacy of a credential holder the proofs disclosed by the wallet should not be traceable across different presentations. This threat appears to be well mitigated by BBS+ through its Zero Knowledge Proof implementation.
 
 \paragraph{Lack of Revocation}
 
-There is no revocation system designed, either for HMAC or BBS+. This may be mitigated by expiration dates, but in some cases they are not enough and interactive revocation is necessary. Since the choice is left open to developers, we will face huge privacy breaches with the adoption of revocation lists.
+There is no revocation system designed, either for HMAC or BBS+. This may be mitigated by expiration dates, but in most cases expiration is not enough and interactive revocation is necessary. If the choice of strategy is left open to developers, we will face huge privacy breaches with the adoption of public revocation lists.
 
 %% - https://github.com/ministero-salute/it-dgc-verificaC19-android/issues/103
 %% - https://osf.io/preprints/lawarxiv/yc6xu
