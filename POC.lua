@@ -15,6 +15,8 @@
 -- License along with this program.  If not, see
 -- <https://www.gnu.org/licenses/>.
 
+CONF.output.encoding = { fun = get_encoding_function'url64',
+                         name = 'url64' }
 -- Simple BLS signature formula
 -- δ = r.O
 -- γ = δ.G2
@@ -34,6 +36,7 @@ G1 = ECP.generator()
 G2 = ECP2.generator()
 -- H =  hash to point function to ECP1
 HG1 = ECP.hashtopoint
+Miller = PAIR.ate
 
 function keygen()
 -- δ = r.O
@@ -50,11 +53,11 @@ end
 function verify(pk, msg, sig)
 -- e(γ,H(m)) == e(G2,σ)
    return(
-	  PAIR.ate(pk, HG1(msg))
-	  == PAIR.ate(G2, sig)
+	  Miller(pk, HG1(msg))
+	  ==
+    Miller(G2, sig)
    )
 end
-
 
 -- Issuer's keyring hardcoded 0x0 seed
 A = {sk = BIG.new(sha256(OCTET.zero(32)))}
@@ -78,7 +81,7 @@ for k,v in pairs(CLAIMS) do
    local rev = BIG.random()
    local id = k..'='..v
    local sig = sign(A.sk, id) + sign(rev, id)
-   SIGNED_CLAIMS[id] = { sig, G1 * rev, G2 * rev, rev }
+   SIGNED_CLAIMS[id] = { sig, G1 * rev, G2 * rev }
    REVOCATIONS['HolderID/'..id] = rev
 end
 
@@ -86,24 +89,23 @@ end
 --         SignedClaims = S_CLAIMS })
 -- holder discloses 3 credentials
 disclose = { 'name', 'gender', 'above_18' }
-PRESENTED_CLAIMS = { }
+CREDENTIAL_PROOF = { }
 sha256 = HASH.new('sha256')
 local tri
 for m,v in pairs(SIGNED_CLAIMS) do
   local sig = v[1] -- naked issuer's sig
   local revG1 = v[2]
   local revG2 = v[3]
---  local rev = v[4] -- temp for test DELETE ME
   local claim = strtok(m, '=')
   local er = BIG.random()
   local tri = BIG.new(sha256:process(
-                  (PAIR.ate(A.pk, revG1) ^ er):octet()
+                  (Miller(A.pk, revG1) ^ er):octet()
   ))
   -- assert(tri == BIG.new(sha256:process(
   --                        (PAIR.ate(A.pk, G1*er)^rev):octet()
   -- )))
   if array_contains(disclose, claim[1]) then
-	  table.insert(PRESENTED_CLAIMS, {
+	  table.insert(CREDENTIAL_PROOF, {
                    id = m,
                    s = sig + sign(tri, m),
                    p = (revG2 + G2*tri):to_zcash(),
@@ -112,21 +114,25 @@ for m,v in pairs(SIGNED_CLAIMS) do
   end
 end
 
--- show encoded claims example
-print(JSON.encode({
-          claims = PRESENTED_CLAIMS,
-          verifier = 'IssuerID'
-}))
-
 function revocation_contains(revocations, claim)
-  local rs
   local res   = false -- store here result for constant time operations
   local rev = revocations[claim.id]
   if rev then
-    local tri = BIG.new(sha256:process(
-                          (PAIR.ate(A.pk,claim.r)^rev):octet()
-    ))
-    if ECP2.from_zcash(claim.p) - (G2*tri) == G2*rev then
+    local tri =
+      BIG.new(
+        sha256:process(
+          (Miller(A.pk,claim.r)^rev)
+          :octet()
+      ))
+
+    if -- addendum of claim.p is equal to revG2
+      ECP2.from_zcash(claim.p) - (G2*tri) == G2*rev
+    and -- verify unblinded issuer signature
+      verify(A.pk, claim.id,
+             claim.s
+             - sign(tri, claim.id)
+             - sign(rev, claim.id))
+    then
       res = true
     end
   end
@@ -135,7 +141,7 @@ end
 
 local torevoke = {
   'HolderID/born_in=Napoli',
---  'HolderID/gender=male',
+  'HolderID/gender=male',
   'HolderID/nationality=italian'}
 local revocations = {}
 for _,v in pairs(torevoke) do
@@ -143,11 +149,19 @@ for _,v in pairs(torevoke) do
   revocations[k] = REVOCATIONS[v]
 end
 
+
+-- show encoded claims example
+print(JSON.encode({
+          credential_proof = CREDENTIAL_PROOF,
+          verifier = 'IssuerID',
+          revocations = revocations
+}))
+
 -- relying party verifies credentials
 -- downloads PK of IssuerID from DID
-for _,claim in pairs(PRESENTED_CLAIMS) do
-   local sig = claim.s
-   local pk = ECP2.from_zcash(claim.p)
-   assert(not revocation_contains(revocations, claim), "Revoked: "..claim.id)
-   assert( verify(pk + A.pk, claim.id, sig) )
+for _,proof in pairs(CREDENTIAL_PROOF) do
+   local sig = proof.s
+   local pk = ECP2.from_zcash(proof.p)
+   assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
+   assert( verify(pk + A.pk, proof.id, sig) )
 end
