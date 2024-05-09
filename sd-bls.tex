@@ -43,16 +43,16 @@ corruption as the identity issuer. Unfortunately, what Europe and USA
 state organizations are currently developing does not offer such basic
 protections. As a solution we introduce a method for untraceable
 selective disclosure and privacy preserving revocation of digital
-credentials, utilizing the unique homomorphic characteristics second
-order Elliptic Curves and Boneh-Lynn-Shacham (BLS) signatures operated
-on them. Our approach ensures that users can selectively reveal only
-the necessary attributes, while protecting their privacy across
-multiple presentations and against colluding verifiers. Since we also
-want to protect users from issuer corruption, we apply a threshold for
-credential issuance and revocation to mandate a collective agreement
-among multiple issuers. Finally, our method of revocation does not
-give out any information on the identity of holders of revoked
-credentials.
+credentials, utilizing the unique homomorphic characteristics of
+second order Elliptic Curves and Boneh-Lynn-Shacham (BLS) signatures
+operated on them. Our approach ensures that users can selectively
+reveal only the necessary attributes, while protecting their privacy
+across multiple presentations and against colluding verifiers. Since
+we also want to protect users from issuer corruption, we apply a
+threshold for credential issuance and revocation to mandate a
+collective agreement among multiple issuers. Finally, our method of
+revocation does not give out any information on the identity of
+holders of revoked credentials.
 
 \end{abstract}
 
@@ -93,6 +93,8 @@ If the choice of interactive revocation is left to a single issuer, one may unil
 
 \section{Overview}
 
+\subsection{Applications}
+\subsection{Key contributions}
 
 \section{Implementation}
 
@@ -103,8 +105,8 @@ In this section we will provide a detailed description of the algorithm we propo
 We will adopt the following notations:
 \begin{itemize}
     \item $\mathbb{F}_p$ is the prime finite field with $p$ elements (i.e. of prime order $p$); % In our case the prime is long 383 bits;
-    \item $E$ denotes the (additive) group of points of the curve BLS-381-12 \cite{bls381-12} which can be described with the Weierstrass form  $y^2=x^3 + 16$;
-    \item $E_T$ represents instead the group of points of the twisted curve of BLS-383, with embedding degree $k=12$. The order of this group is the same of that of $E$;
+    \item $E$ denotes the (additive) group of points of the curve BLS381-12 \cite{bls381-12} which can be described with the Weierstrass form  $y^2=x^3 + 16$;
+    \item $E_T$ represents instead the group of points of the twisted curve of BLS381-12, with embedding degree $k=12$. The order of this group is the same of that of $E$;
 \end{itemize}
 We also require defining the notion of a cryptographic pairing. Basically it is a function $e: \mathbb{G}_1\times\mathbb{G}_2\to \mathbb{G}_T$, where $\mathbb{G}_1,\mathbb{G}_2$ and $\mathbb{G}_T$ are all groups of same order $n$, such that satisfies the following properties:
 \begin{itemize}
@@ -119,6 +121,47 @@ We also require defining the notion of a cryptographic pairing. Basically it is 
     \item[iv. ] $\mathbb{G}_1\ne \mathbb{G}_2$, and moreover, that there exist no efficient homomorphism between $\mathbb{G}_1$ and $\mathbb{G}_2$.
 \end{itemize}
 For the purpose of our protocol we will have $\mathbb{G}_1 = E_T$ and $\mathbb{G}_2 = E$, and $\mathbb{G}_T\subset \mathbb{F}_{p^{12}}$ is the subgroup containing the $n$-th roots of unity, where $n$ is the order of the groups $E$ and $E_T$. Instead $e: E_T  \times E\to \mathbb{G}_T$ is the \emph{Miller pairing}, which in our work is encoded as the method \verb!miller(ECP2 P, ECP Q)!. \\
+
+\subsection{Issuance}
+\subsection{Presentation}
+\subsection{Verification}
+\subsection{Revocation}
+\subsection{Security considerations}
+
+BLS signatures and the proof system obtained with credentials are
+considered secure by assuming the existence of random oracles
+\cite{random-oracle}, together with the decisional Diffie-Hellman
+Problem (DDH) \cite{DDH-problem}, the external Diffie-Hellman Problem
+(XDH), and with the Lysyanskaya-Rivest-Sahai-Wol Problem (LRSW)
+\cite{lrsw-assumption}, which are connected to the Discrete
+Logarithm. In fact, under these assumptions, we have that our protocol
+satisfies unforgeability, blindness, and unlinkability.
+
+One may object about the maturity of pairing-based ellipcic curve
+cryptography despite various efforts to measure its security and
+design curve parameters that raise it, it is reasonable to consider
+this as a pioneering field of cryptography in contrast to well tested
+standards.
+
+In addition to considerations on the maturity of EC, the future growth
+of quantum-computing technologies may be able to overcome the Discrete
+Logarithmic assumptions by qualitatively different computational
+means. Reflow then may be vulnerable to quantum-computing attacks, as
+well hard to patch, because the pairing-based design sits at its core
+with the adoption of ATE / Miller loop pairing of curves in twisted
+space, a practice that is not covered by research on quantum-proof
+algorithms and will eventually need more time to be addressed; however
+this is all speculative reasoning on what we can expect from the
+future.
+
+The SD-BLS implementation we are presenting in this paper is
+demonstrated using the BLS381-12 curve \cite{bls381-12} also adopted
+by ETH2.0. Debating the choice of BLS381-12 is beyond the scope of
+this paper, but is worth mentioning that we can easily switch usingthe
+BLS461 curve based on a 461 bit prime, hence upgrading our
+implementation to 128 bit security \cite{updating-key-pairings}
+against attacks looking for discrete logs on elliptic curves
+\cite{discrete-log-attack}.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
