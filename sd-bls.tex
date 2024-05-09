@@ -170,9 +170,6 @@ Miller = PAIR.ate
 \subsection{Issuance}
 
 \begin{lstlisting}[style=lua,caption={Issuer key generation}]
-G1 = ECP.generator()
-G2 = ECP2.generator()
-HG1 = ECP.hashtopoint
 function keygen()
    local sk = INT.random()
    return { sk = sk,
@@ -201,7 +198,7 @@ CLAIMS = {
 }
 \end{lstlisting}
 
-Upon verification of claims, the issuer can send back them signed:
+Upon verification of claims, the issuer can send them back signed:
 
 \begin{lstlisting}[style=lua,caption={Issuer signs claims}]
 SIGNED_CLAIMS = { }
