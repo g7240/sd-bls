@@ -56,22 +56,6 @@ function verify(pk, msg, sig)
 end
 
 
---- s = A.sk + R.sk *G2 R.pk
---- p = s + E.sk
---- v ( A.pk + R.pk + E.pk - G.sk, m, p - G.sk)
-D = keygen()
-E = keygen()
-F = keygen()
-G = keygen()
-local m = O.random(16)
-local d = sign(D.sk, m)
-local e = sign(E.sk, m)
-local f = sign(F.sk, m)
-local g = sign(G.sk, m)
-s = d + e + f + g
-p = D.pk + E.pk + F.pk + G.pk
-assert( verify(p, m, s))
-
 -- Issuer's keyring hardcoded 0x0 seed
 A = {sk = BIG.new(sha256(OCTET.zero(32)))}
 A.pk = G2*A.sk
