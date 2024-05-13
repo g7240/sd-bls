@@ -76,15 +76,22 @@
 \IEEEauthorblockA{
 % \textit{dept. name of organization (of Aff.)} \\
 \textit{Dyne.org Foundation}\\
-Amsterdam, The Netherlands \\
+The Netherlands \\
 jaromil@dyne.org}
 \and
-\IEEEauthorblockN{2\textsuperscript{nd} Andrea D'Intino}
+\IEEEauthorblockN{2\textsuperscript{nd} Rebecca Selvaggini}
+\IEEEauthorblockA{
+\textit{dept. of Mathematics} \\
+\textit{University of Trento}\\
+Italy
+}
+\and
+\IEEEauthorblockN{3\textsuperscript{rd} Andrea D'Intino}
 \IEEEauthorblockA{
 % \textit{dept. name of organization (of Aff.)} \\
 \textit{The Forkbomb Company}\\
-Copenhagen, Denmark \\
-andrea@forkbomb.eu}
+Denmark \\
+info@forkbomb.eu}
 }
 
 \maketitle
@@ -420,7 +427,7 @@ The signature $s$ is given by
 \begin{split}
     s &= \sigma + sign(\tau, id) \quad \text{where} \\
     \sigma &= sign(A.sk, id) + sign(rev, id) \\
-    \text{so} \quad s &= A.sk U + rev U + \tau U  
+    \text{so} \quad s &= A.sk U + rev U + \tau U
 \end{split}
 \end{equation*}
 where $U$ is the mapping of the string $id$ in the group $G_1$.\\
@@ -434,7 +441,7 @@ Recalling the verification formula, it holds that:
  &= e(G_2, A.sk U) \cdot e(G_2, rev U + \tau U) \\
  &= e(G_2, A.sk U + rev U + \tau U) \\
  &= e(G_2, s) \\
-\end{split}    
+\end{split}
 \end{equation*}
 where each equality holds for the bilinearity of the Miller loop.
 
@@ -474,7 +481,7 @@ Then we can verify if a credential claim has been revoked checking first if the 
 \end{equation*}
 and then verify the following signature with issuer pk
 \begin{equation}\label{sig_minus}
-    sig = s - sign(\tau, id) - sign(rev, id) 
+    sig = s - sign(\tau, id) - sign(rev, id)
 \end{equation}
 This signature should be verified with issuer pk since:
 \begin{equation*}
@@ -487,7 +494,7 @@ then exploiting the homomorphic property of BLS signature
 we got that $sig$ in \eqref{sig_minus} is signed using the issuer private key.
 Qui si può inserire reference all'implementazione del metodo.
  TODO(?): spiegare perchè non puoi fingere una revocation key?
- 
+
 \subsection{Security considerations}
 
 BLS signatures and the proof system obtained with credentials are
