@@ -341,45 +341,35 @@ The revocations database is privacy sensitive and the issuance of
 revocations is also sensitive to corruption, and we will detail
 mitigations about this later.
 
-\subsection{Presentation}
+\subsection{Presentation} \label{presentation}
 
 As we have done in the issuance phase (\ref{issuance}), we exploit the
 homomorphic property of BLS signatures once again, but this time to
 render the presented signature unlinkable (impossible to trace across
 multiple presentations) by adding a "blinding factor" signature to the
-one provided by the issuer.
+one provided by the issuer. \\
 
 %% TODO: math formula della presentazione
+Let $\mathcal{H}$ denote a cryptographic hash function (say SHA-256) and let $\varepsilon$ be an integer chosen uniformly at random that serve as the blinding factor.
+Using the same technique of the Tripartite Diffie-Hellman Key Exchange (insert reference) we construct a secret that is binded to the blinding factor, the Issuer public key and the "revocation point" $r_1 = rev \cdot G_1$ computed in the issuance phase:
 
-\begin{lstlisting}[style=lua,caption={Holder presents credentials}]
--- select credentials to disclose
-disclose={'name','gender','above_18'}
-CREDENTIAL_PROOF = { }
-sha256 = HASH.new('sha256')
-for m,v in pairs(SIGNED_CLAIMS) do
-  local sig   = v[1]
-  local revG1 = v[2]
-  local revG2 = v[3]
-  local claim = strtok(m, '=')
--- generate a blinding factor
-  local er = BIG.random()
--- bind it to the revocation key
-  local tri = BIG.new(sha256:process(
-  (PAIR.ate(A.pk, revG1) ^ er):octet()
-  ))
-  if array_contains(disclose, claim[1]) then
-	table.insert(CREDENTIAL_PROOF, {
-    id = m,
--- apply blinding to the signature
-    s = sig + sign(tri, m),
--- apply blinding to the public key
-    p = (revG2 + G2*tri):to_zcash(),
--- attach the revocation hook
-    r = G1*er
-  })
-  end
-end
-\end{lstlisting}
+\begin{equation}\label{tau_f}
+    \tau = \mathcal{H}(e(A.pk, r_1)^{\varepsilon})
+\end{equation}
+
+When the Holder need to disclose a particular claim $m$ we construct the credential proof as follow:
+let $\sigma$ be the signature of the claim provided by the Issuer, then apply the blinding factor to the signature using the secret $\tau$
+\begin{equation}\label{claim.s}
+    s = \sigma + sign(\tau, m)
+\end{equation}
+and the corresponding public key computed as
+\begin{equation*}
+    p = r_2 + G_2 \cdot \tau
+\end{equation*}
+where $r_2$ is the revocation key linked to the claim.
+We also attach the public key $r = G_1 \cdot \varepsilon$ that correspond to the secret key $\varepsilon$.
+
+Qui link al codice relativo.
 
 Presented claims can be encoded in JSON and url64 for a credential proof that will look like this:
 
@@ -409,25 +399,44 @@ Presented claims can be encoded in JSON and url64 for a credential proof that wi
 }
 \end{lstlisting}
 
-
 \subsection{Verification}
 
-Credential verification is made by checking that the issuer has signed the blinded proof being presented. In order to do that the credential issuer's public key must be added to the proof.
+Credential verification is made by checking that the issuer has signed the blinded proof being presented. In order to do that the credential issuer's public key must be added to the proof.\\
+As explained in section \ref{presentation} we can consider the credential proof as a collection of tables of the following form:
+\begin{equation*}
+    c_p = \{id, p, r, s \}
+\end{equation*}
+where $s$ and $p$ are resp. the sig and the pk of the credential proof of the string $id$
+after verifing the status of the revocation, we can check the validity of the presented claim computing the key
+\begin{equation*}
+    pk = A.pk + p
+\end{equation*}
+and verify the bls signature.
 
-\begin{lstlisting}[style=lua,caption={Holder presents credentials}]
-for _,proof in pairs(CREDENTIAL_PROOF) do
-   local sig = proof.s
-   local pk = ECP2.from_zcash(proof.p)
--- verify the credential isn't revoked
-   assert(not
-   revocation_contains(revocations,
-   proof), "Revoked: "..proof.id)
--- verify the credential is authentic
-   assert(
-   verify(pk + A.pk, proof.id, sig) )
-end
-\end{lstlisting}
-
+\subsubsection{Proof of correctness}
+(questa è praticamente una proof dell'homomorphic property...)
+The signature $s$ is given by
+\begin{equation*}
+\begin{split}
+    s &= \sigma + sign(\tau, id) \quad \text{where} \\
+    \sigma &= sign(A.sk, id) + sign(rev, id) \\
+    \text{so} \quad s &= A.sk U + rev U + \tau U  
+\end{split}
+\end{equation*}
+where $U$ is the mapping of the string $id$ in the group $G_1$.\\
+Recalling the verification formula, it holds that:
+\begin{equation*}
+\begin{split}
+ e(pk, U) &= e(A.skG_2 + revG_2 + \tau G_2, U) \\
+ &= e(A.skG_2 + revG_2)\cdot e(\tau G_2, U) \\
+ &= e(A.skG_2, U) \cdot e(revG_2, U) \cdot e(\tau G_2, U) \\
+ &= e(G_2, A.sk U) \cdot e(G_2, rev U) \cdot e(G_2, \tau U) \\
+ &= e(G_2, A.sk U) \cdot e(G_2, rev U + \tau U) \\
+ &= e(G_2, A.sk U + rev U + \tau U) \\
+ &= e(G_2, s) \\
+\end{split}    
+\end{equation*}
+where each equality holds for the bilinearity of the Miller loop.
 
 \subsection{Revocation}
 
@@ -443,33 +452,42 @@ To make sure no revocation has been emitted for each credential, we update the r
 }
 \end{lstlisting}
 
-\begin{lstlisting}[style=lua,caption={Holder presents credentials}]
-function revocation_contains
-  (revocations, claim)
-  local res = false -- result
-  local rev = revocations[claim.id]
-  if rev then
-    local tri =
-      BIG.new(
-        sha256:process(
-          (Miller(A.pk,claim.r)^rev)
-          :octet()
-      ))
-    if -- addendum of claim.p == revG2
-      ECP2.from_zcash(claim.p) - (G2*tri) == G2*rev
-    and -- unblinded issuer signature
-      verify(A.pk, claim.id,
-             claim.s
-             - sign(tri, claim.id)
-             - sign(rev, claim.id))
-    then
-      res = true
-    end
-  end
-  return res
-end
-\end{lstlisting}
+Given an element $c_p = \{id, p, r, s \}$ of the credential proof table and the Issuer public key $A.pk$, if the claim id is present in the revocation list we can take the corresponding revocation private key $rev$ and compute the factor $\tau$ as
+\begin{equation}\label{tau}
+        \tau = \mathcal{H}(e(A.pk, r)^{rev})
+\end{equation}
 
+The equation \eqref{tau} gives the same result as \eqref{tau_f} since using the bilinearity of the pairing we have (qui possiamo citare https://cgi.di.uoa.gr/~aggelos/crypto/page4/assets/joux-tripartite.pdf)
+\begin{equation*}
+    \begin{split}
+        \tau &= \mathcal{H}(e(A.pk, r)^{rev}) \\
+        &= \mathcal{H}(e(A.pk, G_1 \cdot \varepsilon)^{rev}) \\
+        &= \mathcal{H}(e(A.pk, G_1)^{rev + \varepsilon}) \\
+        &= \mathcal{H}(e(A.pk, G_1 \cdot rev)^{\varepsilon}) \\
+        &= \mathcal{H}(e(A.pk, r_1)^{\varepsilon})
+    \end{split}
+\end{equation*}
+
+Then we can verify if a credential claim has been revoked checking first if the revocation public key match:
+\begin{equation*}
+    G_2 \cdot rev = p - G_2 \cdot \tau
+\end{equation*}
+and then verify the following signature with issuer pk
+\begin{equation}\label{sig_minus}
+    sig = s - sign(\tau, id) - sign(rev, id) 
+\end{equation}
+This signature should be verified with issuer pk since:
+\begin{equation*}
+    \begin{split}
+        s &= \sigma + sign(\tau, id) \quad \text{from \eqref{claim.s}} \\
+        &=  sign(sk, id) + sign(rev, id) + sign(\tau, id)
+    \end{split}
+\end{equation*}
+then exploiting the homomorphic property of BLS signature
+we got that $sig$ in \eqref{sig_minus} is signed using the issuer private key.
+Qui si può inserire reference all'implementazione del metodo.
+ TODO(?): spiegare perchè non puoi fingere una revocation key?
+ 
 \subsection{Security considerations}
 
 BLS signatures and the proof system obtained with credentials are
