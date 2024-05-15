@@ -128,7 +128,7 @@ Such systems are known as selective disclosure and this article aims at improvin
 
 \subsection{State of the art}
 
-Selective disclosures are being used by nation states across the world in their next generation identity systems, for instance EIDAS2.0 in Europe where the European Digital Identity Wallet Architecture and Reference Framework\cite{eudi-arf} mandates the use of SD-JWT\cite{sd-jwt}. Unfortunately SD-JWT adopts simple HMAC based cryptography to generate proofs that can be traced.
+Selective disclosures are being used by nation states across the world in their next generation identity systems, for instance EIDAS2.0 in Europe where the European Digital Identity Wallet Architecture and Reference Framework\cite{eudi-arf} mandates the use of SD-JWT\cite{sd-jwt} and mDOC \cite{mdoc}. Unfortunately both SD-JWT and mDOC adopt simple HMAC based cryptography to generate proofs that can be traced.
 
 In North America the situation seems to be slightly different: the cryptography adopted is based on the BBS+ algorithm\cite{bbs+} leveraging its Zero Knowledge Proof properties and applied to W3C Verifiable Credentials\cite{w3c-vc} to obtain an higher degree of privacy.
 
@@ -546,6 +546,27 @@ this paper, but is worth mentioning that we can easily switch using the BLS461 c
 implementation to 128 bit security \cite{updating-key-pairings}
 against attacks looking for discrete logs on elliptic curves
 \cite{discrete-log-attack}.
+
+\subsection{Future development}
+In this section we describe possibilities for expanding the algorithm to cover further applications, which appear promising while requiring further investigation.
+
+\paragraph{Compatibility with EUDI-ARF}
+EUDI-ARF dictates that the holder's secret key generation and signatures must occur inside a trusted platform module (TPM). For mobile devices, this limits the secret keys and signatures to those offered, via proprietary APIs by the mobile OS, namely RSA (multiple flavours) and ECDSA on secp256r1 (also known as NIST-256 and P-256 curve). Currently the TPMs APIs supported by Android and iOS do not support BLS12381 key generation or signature. 
+Client-side signatures in EUDI-ARF are mostly used in the authentication process, specifically in the proof of possession required by the OpenID4VCI\cite{OID4VCI} issuance flow, but not in the verification.
+Therefore, we can investigate the possibility to use SD-BLS to implement a partially retro-compatible superset of EUDI-ARF, by maintaining the current issuance and verification protocols and using an extended SD-JWT format.
+
+
+\paragraph{Digital Product Passport}
+Efforts in standardization of Digital Product Passport (DPP) are ongoing in both the EU (Cirpass, BatteryPass, Trace4EU) and US (DSCSA). An obstacle to adoption of DPP technologies is the reluctancy of manufacturers to share information about their supply-chain, knowing that the information would become publicly available and immutable due to blockchain storage. While requiring further analysis and investigation, a further development of the SD-BLS scheme could allow creating DPPs built on the zero knowledge proof and selective disclosure principles, which may facilitate the adoption of the technology in the industry. 
+
+\paragraph{Hardening}
+Our preliminary benchmarks suggest that while the computationally heaviest part of cryptographic scheme is the verification, the issuance and the creations of a presentation are computationally relatively inexpensive.
+We could investigate and evaluate the convenience of \textit{hardening} the credentials, in order to increase the computational effort required to calculate the issuer's secret key(s) from a credential and aggregated public keys. 
+This can be achieved by equipping each issuer with multiple private keys, allowing each credential attributed to be signed with each secret key, whose correspondent public keys are publish as already aggregated. 
+A model involving configuration with different amount of private keys and benchmarks, could be investigated. In turn this could produce an estimate of the computational power required to compute the issuer's secret keys (on traditional and quantum computers) along with estimates of computing power needed to issue, present and verify credentials, which can be used to implement different configurations of the algorithm (similarly to RSA and Dilithium).
+
+\paragraph{Reusable homomorphic cryptography approach}
+The SD-BLS algorithm uses well accepted mathematics and has a relatively simple approach to homomorphic. While highly speculative, we suspect that a similar approach may be re-used outside the domain of the BLS-12381 curve, hypothetically within the fields of fully homomorphic encryption (FHE) or lattice cryptography, the latter used in the ml-dsa signature, NIST's latest standardization effort aimed at quantum-resistent signature, described in FIPS 204 \cite{FIPS-204}. 
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
