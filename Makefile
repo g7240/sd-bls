@@ -17,10 +17,7 @@ mermaid:
 	$(call mermaid,verify.mmd,verify-seq.png)
 
 clean:
-	rm -f *blg *dvi *pdf *toc *out *aux *log *lof
-
-clean-all:
-	rm -f *blg *bbl *dvi *pdf *toc *out *aux *log *lof *-seq.png *.zen *.json
+	rm -f *blg *bbl *dvi *pdf *toc *out *aux *log *lof
 
 arxiv:
 	epstopdf create_session.eps
