@@ -70,8 +70,7 @@ function test_many_verifs(num, proofs)
   for k,v in ipairs(proofs) do
     local sig = v.s
     local pk = ECP2.from_zcash(v.p)
---    assert( verify(pk + A.pk, v.id, sig) ) TODO
-    verify(pk + A.pk, v.id, sig)
+    assert( verify(pk + A.pk, v.id, sig) )
     c = c + 1
     if c == num then break end
   end
