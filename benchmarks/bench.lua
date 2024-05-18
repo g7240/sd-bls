@@ -66,7 +66,6 @@ end
 function test_many_verifs(num, proofs)
   local start = os.clock()
   local c = 0
-
   for k,v in ipairs(proofs) do
     local sig = v.s
     local pk = ECP2.from_zcash(v.p)
