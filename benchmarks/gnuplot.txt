@@ -1,0 +1,9 @@
+set title "OUT"
+# set terminal png rounded size 1024,768
+set terminal eps
+# set samples 100
+# set format y "%s"
+# set style data points
+set xlabel "claims"
+set ylabel "seconds"
+plot "OUT" using 1:2 notitle
