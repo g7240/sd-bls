@@ -1,3 +1,4 @@
+-- common.lua
 -- Copyright (C) 2024 Dyne.org foundation designed, written and
 -- maintained by Denis Roio <jaromil@dyne.org>
 --
@@ -17,9 +18,6 @@
 
 CONF.output.encoding = { fun = get_encoding_function'url64',
                          name = 'url64' }
-
-A = keygen()
-sha256 = HASH.new('sha256')
 G1 = ECP.generator()
 G2 = ECP2.generator()
 HG1 = ECP.hashtopoint
@@ -36,6 +34,9 @@ function sign(sk, msg)
 -- σ = δ * ( H(m)*G1 )
    return HG1(msg) * sk
 end
+
+A = keygen()
+sha256 = HASH.new('sha256')
 
 function verify(pk, msg, sig)
 -- e(γ,H(m)) == e(G2,σ)

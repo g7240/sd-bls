@@ -1,26 +1,30 @@
 
 STATS := issueproveverify.txt verifyrevocations.txt
-TERMOPTS := rounded size 1024,768
 
-all: issueproveverify verifyrevocations
+all: issueproveverify.eps verifyrevocations.eps hamming.eps
 
-issueproveverify: ${STATS}
-	 sed 's/OUT/$@.txt/; s/TERM/pngcairo dashed ${TERMOPTS}/' \
-	 gnuplot.txt | gnuplot  > $@.png
-	 sed 's/OUT/$@.txt/; s/TERM/eps/' \
-	 gnuplot.txt | gnuplot  > $@.eps
+# issueproveverify: ${STATS}
+# 	 sed 's/OUT/$@.txt/; s/TERM/pngcairo dashed ${TERMOPTS}/' \
+# 	 gnuplot.txt | gnuplot  > $@.png
+# 	 sed 's/OUT/$@.txt/; s/TERM/eps/' \
+# 	 gnuplot.txt | gnuplot  > $@.eps
 
-verifyrevocations: ${STATS}
-	 sed 's/OUT/$@.txt/; s/TERM/pngcairo dashed ${TERMOPTS}/' \
-	 $@.gnuplot | gnuplot  > $@.png
-	 sed 's/OUT/$@.txt/; s/TERM/eps/' \
-	 $@.gnuplot | gnuplot  > $@.eps
+# verifyrevocations: ${STATS}
+# 	 sed 's/OUT/$@.txt/; s/TERM/pngcairo dashed ${TERMOPTS}/' \
+# 	 $@.gnuplot | gnuplot  > $@.png
+# 	 sed 's/OUT/$@.txt/; s/TERM/eps/' \
+# 	 $@.gnuplot | gnuplot  > $@.eps
 
-issueproveverify.txt:
-	zenroom -l common.lua bench.lua | tee $@
+%.png: %.txt
+	sed 's/TERM/pngcairo dashed rounded size 1024,768/' \
+		$(basename $@).gnuplot | gnuplot  > $(basename $@).png
 
-verifyrevocations.txt:
-	zenroom -l common.lua revoc.lua | tee $@
+%.eps: %.txt
+	sed 's/TERM/eps/' \
+		$(basename $@).gnuplot | gnuplot  > $(basename $@).eps
+
+%.txt: %.gnuplot
+	zenroom -l common.lua ${basename $@}.lua | tee $@
 
 clean:
-	rm -f ${STATS}
+	rm -f *.txt *.eps *.png
