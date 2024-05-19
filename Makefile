@@ -1,26 +1,26 @@
-TARGET := sd-bls
 
-# run latex enough times to iterate over bibtex
-all:
-	pdflatex ${TARGET} 
-	bibtex ${TARGET}
-	pdflatex ${TARGET}
-	pdflatex ${TARGET}
+arxiv: compose-arxiv
+	pdflatex sd-bls
+	bibtex   sd-bls
+	pdflatex sd-bls
+	pdflatex sd-bls
 
+# epstopdf verifyrevocations.eps
+# epstopdf issueproveverify.eps
+# epstopdf hamming.eps
 
-# docker pull minlag/mermaid-cli
-mermaid = docker run --rm -v=${PWD}:/app/data minlag/mermaid-cli -w 2048 -H 1536 -i /app/data/$(1) -o /app/data/$(2)
-mermaid:
-	mkdir -p data
-	$(call mermaid,keygen.mmd,keygen-seq.png)
-	$(call mermaid,sign.mmd,sign-seq.png)
-	$(call mermaid,verify.mmd,verify-seq.png)
+ieee: compose-ieee
+	pdflatex sd-bls
+	bibtex   sd-bls
+	pdflatex sd-bls
+	pdflatex sd-bls
+
+compose-ieee:
+	cat sd-bls.head-ieee.tex sd-bls.body.tex > sd-bls.tex
+
+compose-arxiv:
+	cat sd-bls.head-arxiv.tex sd-bls.body.tex > sd-bls.tex
 
 clean:
 	rm -f *blg *bbl *dvi *pdf *toc *out *aux *log *lof
-
-arxiv:
-	epstopdf create_session.eps
-	epstopdf credential_diagram.eps
-	epstopdf valueflows.eps
-	epstopdf verify_sign.eps
+	rm -f *converted-to*

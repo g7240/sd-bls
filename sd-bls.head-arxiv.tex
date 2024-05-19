@@ -1,0 +1,92 @@
+%  * Copyright (C) 2020-2021 Dyne.org foundation
+
+\documentclass[twocolumn]{article}
+\pdfoutput=1
+
+% Roman numbers for sections
+% \renewcommand{\thesection}{\Roman{section}}
+% \renewcommand{\thesubsection}{\thesection.\Roman{subsection}}
+
+\usepackage{arxiv}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{enumitem}
+\setlist[itemize]{align=parleft,left=0pt..1em}
+\setlist[enumerate]{align=parleft,left=0pt..1.5em,label=\large\protect\textcircled{\small\arabic*}}
+\usepackage[font=scriptsize]{caption}
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{graphicx,epstopdf}
+% \usepackage{natbib}
+\usepackage{doi}
+\usepackage{inconsolata}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{booktabs} % For prettier tables
+
+\usepackage{hyperref} % For hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+\title{SD-BLS}
+
+\author{
+  Denis Roio \\
+  Dyne.org \\
+    \And
+  Rebecca Selvaggini \\
+  UniTN \\
+    \And
+  Andrea D'Intino \\
+  Forkbomb B.V.
+}
+
+\renewcommand{\headeright}{Dyne.org}
+\renewcommand{\undertitle}{Privacy Preserving Selective Disclosure and Unlinkable Revocation of Verifiable Credentials}
+\renewcommand{\shorttitle}{\textit{SD-BLS}}
+
+\hypersetup{
+  pdftitle={SD-BLS: Privacy Preserving Selective Disclosure and Unlinkable Revocation of Verifiable Credentials},
+  pdfsubject={cs.CR},
+  pdfauthor={Denis Roio, Rebecca Selvaggini, Andrea D'Intino},
+  pdfkeywords={Privacy, Selective disclosure, BLS signatures, Digital credentials}
+}
+
+\begin{document}
+
+\twocolumn[
+  \begin{@twocolumnfalse}
+
+\maketitle
+
+\begin{abstract}
+It is of critical importance to design digital identity systems that
+ensure the privacy of citizens as well protect them from issuer
+corruption. Unfortunately, what Europe's and USA's public sectors are
+currently developing does not offer such basic protections. Aiming at
+solving this issue, we propose a method for untraceable selective
+disclosure and privacy preserving revocation of digital credentials,
+utilizing the unique homomorphic characteristics of second order
+Elliptic Curves and Boneh-Lynn-Shacham (BLS) signatures operated on
+them. Our approach ensures that users can selectively reveal only the
+necessary credentials, while protecting their privacy across multiple
+presentations.  We also aim to protect users from issuer corruption,
+by making it possible to apply a threshold for revocation to require
+collective agreement among multiple revocation issuers.
+\end{abstract}
+
+\vspace{2cm}
+
+ \end{@twocolumnfalse}
+]
