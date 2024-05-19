@@ -1,9 +1,11 @@
 <% Encoding: UTF-8
 
 @article{bls381-12,
-  title={The Apache Milagro Crypto Library (Version 2.2)},
-  author={Scott, Michael},
-  year = {2017}
+  title={Constructing Elliptic Curves with Prescribed Embedding Degrees},
+  author={Barreto, P. S. L. M. and Lynn, B. and Scott, M.},
+  journal={Springer},
+  conference={Third International Conference, SCN 2002, Amalfi, Italy, September 11-13, 2002, Revised Papers},
+  year = {2003}
 }
 
 @inproceedings{discrete-log-attack,
@@ -42,10 +44,12 @@ doi={10.1007/s10623-015-0094-2},
 url={https://doi.org/10.1007/s10623-015-0094-2}
 }
 
+
 @TECHREPORT{DDH-problem,
 author="Boneh, Dan",
 editor="Buhler, Joe P.",
 title="The Decision Diffie-Hellman problem",
+institution="Stanford University",
 booktitle="Algorithmic Number Theory",
 year="1998",
 publisher="Springer Berlin Heidelberg",
@@ -60,45 +64,53 @@ isbn="978-3-540-69113-6"
   author={Lysyanskaya, Anna and Rivest, Ronald L and Sahai, Amit and Wolf, Stefan},
   booktitle={International Workshop on Selected Areas in Cryptography},
   pages={184--199},
+  institution="MIT, ETH Zurich",
   year={1999},
   organization={Springer}
 }
 
-@article{eudi-arf,
+@standard{eudi-arf,
   title={European digital identity architecture and reference framework},
-  author={Europe, Commission},
+  author={De Rosa, P.},
+  organization={Europe, Commission},
   url={https://digital-strategy.ec.europa.eu/en/library/european-digital-identity-architecture-and-reference-framework-outline}
 }
 
-@article{sd-jwt,
+@techreport{sd-jwt,
   author={Fett, D. and Yasuda, K. and Campbell, B},
   title={Selective Disclosure for JWTs (SD-JWT)},
-  url={https://datatracker.ietf.org/doc/draft-ietf-oauth-selective-disclosure-jwt/}
+  institution={Internet Engineering Task Force},
+  url={https://datatracker.ietf.org/doc/draft-ietf-oauth-selective-disclosure-jwt/},
+  year={2024}
 }
 
-@article{OID4VCI,
-  author={Lodderstedt, T. and Yasuda, K. and Looker, T.},
+@standard{OID4VCI,
   title={OpenID for Verifiable Credential Issuance},
+  organization={OpenID foundation},
+  author={Lodderstedt, T. and Yasuda, K. and Looker, T.},
   url={https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html}
 }
 
-@article{FIPS-204,
-  author={NIST},
+@standard{FIPS-204,
+  author={National Institute of Standards and Technology},
+  organization={National Institute of Standards and Technology},
   title={Module-Lattice-Based Digital Signature Standard},
   url={https://csrc.nist.gov/pubs/fips/204/ipd}
 }
 
-
-
-@article{mdoc,
+@standard{mdoc,
   title={ISO/IEC 18013-5:2021},
   author={ISO/IEC},
+  organization={ISO/IEC},
+  year={2021},
   url={https://www.iso.org/standard/69084.html}
 }
 
-@article{status-lists,
+@techreport{status-lists,
   author={Sporny, Manu and Longley, Dave and Steele, Orie and Prorock, Mike and Alkhraishi, Mahmoud},
   title={Status lists (W3C)},
+  year={2023},
+  institution={W3C Foundation},
   url={https://www.w3.org/community/reports/credentials/CG-FINAL-vc-status-list-2021-20230102/}
 }
 
@@ -130,7 +142,7 @@ location = {Vienna, Austria},
 series = {ARES '21}
 }
 
-@inproceedings{10.1007/10722028_23,
+@inproceedings{tripartite,
 author="Joux, Antoine",
 editor="Bosma, Wieb",
 title="A One Round Protocol for Tripartite Diffie--Hellman",
@@ -141,5 +153,76 @@ address="Berlin, Heidelberg",
 pages="385--393",
 isbn="978-3-540-44994-2"
 }
+
+@ARTICLE{CRL,
+  author={Naor, M. and Nissim, K.},
+  journal={IEEE Journal on Selected Areas in Communications},
+  title={Certificate revocation and certificate update},
+  year={2000},
+  volume={18},
+  number={4},
+  pages={561-570},
+  keywords={Public key;Data structures;Dictionaries;Costs;Robustness;Certification;Credit cards;Scalability;Cathode ray tubes},
+  doi={10.1109/49.839932}}
+
+@InProceedings{crlcomparison,
+author="Gentry, Craig",
+editor="Biham, Eli",
+title="Certificate-Based Encryption and the Certificate Revocation Problem",
+booktitle="Advances in Cryptology --- EUROCRYPT 2003",
+year="2003",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="272--293",
+abstract="We introduce the notion of certificate-based encryption. In this model, a certificate --- or, more generally, a signature --- acts not only as a certificate but also as a decryption key. To decrypt a message, a keyholder needs both its secret key and an up-to-date certificate from its CA (or a signature from an authorizer). Certificate-based encryption combines the best aspects of identity-based encryption (implicit certification) and public key encryption (no escrow). We demonstrate how certificate-based encryption can be used to construct an efficient PKI requiring less infrastructure than previous proposals, including Micali's Novomodo, Naor-Nissim and Aiello-Lodha-Ostrovsky.",
+isbn="978-3-540-39200-2"
+}
+
+@inproceedings{tripartite2,
+  title={A one round protocol for tripartite Diffie--Hellman},
+  author={Joux, Antoine},
+  booktitle={International algorithmic number theory symposium},
+  pages={385--393},
+  year={2000},
+  organization={Springer}
+}
+@inproceedings{pvss_schoenmakers,
+  title={A simple publicly verifiable secret sharing scheme and its application to electronic voting},
+  author={Schoenmakers, Berry},
+  booktitle={Annual International Cryptology Conference},
+  pages={148--164},
+  year={1999},
+  url={https://dl.acm.org/doi/10.5555/646764.703956},
+  organization={Springer}
+}
+@inproceedings{coconut,
+  title={Coconut: Threshold Issuance Selective Disclosure Credentials with Applications to Distributed Ledgers},
+  author={Sonnino, A. and Al-Bassam, M. and Bano, S. and Meiklejohn, S. and Danezis, G.},
+  booktitle={NDSS Symposium 2019},
+  year={2019},
+  organization={Network and Distributed
+  System Security (NDSS) Symposium},
+  url={https://arxiv.org/pdf/1802.07344}
+}
+
+@misc{ebsi,
+      title={Transforming EU Governance: The Digital Integration through EBSI and GLASS},
+      author={Dimitrios Kasimatis and William J Buchanan and Mwarwan Abubakar and Owen Lo and Christos Chrysoulas and Nikolaos Pitropakis and Pavlos Papadopoulos and Sarwar Sayeed and Marc Sel},
+      year={2024},
+      eprint={2212.03218},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR}
+}
+
+@ARTICLE{dao,
+  author={Liu, Lu and Zhou, Sicong and Huang, Huawei and Zheng, Zibin},
+  journal={IEEE Open Journal of the Computer Society},
+  title={From Technology to Society: An Overview of Blockchain-Based DAO},
+  year={2021},
+  volume={2},
+  number={},
+  pages={204-215},
+  keywords={Blockchains;Security;Organizations;Bitcoin;Databases;Fault tolerant systems;Computer hacking;Blockchain;contracts;DAO;fault tolerant system;governance},
+  doi={10.1109/OJCS.2021.3072661}}
 
 @Comment{jabref-meta: databaseType:bibtex;}
