@@ -15,15 +15,15 @@ all: issueproveverify.eps verifyrevocations.eps hamming.eps
 # 	 sed 's/OUT/$@.txt/; s/TERM/eps/' \
 # 	 $@.gnuplot | gnuplot  > $@.eps
 
-%.png: %.txt
+%.png: %.txt %.gnuplot
 	sed 's/TERM/pngcairo dashed rounded size 1024,768/' \
 		$(basename $@).gnuplot | gnuplot  > $(basename $@).png
 
-%.eps: %.txt
+%.eps: %.txt %.gnuplot
 	sed 's/TERM/eps/' \
 		$(basename $@).gnuplot | gnuplot  > $(basename $@).eps
 
-%.txt: %.gnuplot
+%.txt:
 	zenroom -l common.lua ${basename $@}.lua | tee $@
 
 clean:
