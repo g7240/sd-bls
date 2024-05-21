@@ -1,6 +1,6 @@
 %  * Copyright (C) 2020-2021 Dyne.org foundation
 
-\documentclass[twocolumn]{article}
+\documentclass{article}
 \pdfoutput=1
 
 % Roman numbers for sections
@@ -8,21 +8,41 @@
 % \renewcommand{\thesubsection}{\thesection.\Roman{subsection}}
 
 \usepackage{arxiv}
-
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+
+ %\usepackage{lmodern}
+ %%
+ %\usepackage{mathpazo}
+ %\usepackage[theoremfont]{newpxmath} \usepackage{newpxmath}
+ %\usepackage{kpfonts}
+ %%
+ %\usepackage{mathptmx}
+ %\usepackage{times,mtpro2}
+ %\usepackage{stix}
+ %\usepackage{txfonts}
+ %\usepackage{newtxtext,newtxmath}
+ %%
+ %\usepackage{libertine} \usepackage[libertine]{newtxmath}
+ \usepackage{libertine,libertinust1math} % added 2019/11/28
+
+
+ %%
+ %\usepackage{newpxtext}
+ %\usepackage[euler-digits]{eulervm}
+
 \usepackage{hyperref}       % hyperlinks
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsmath}
-\usepackage{amsthm}
+% \usepackage{amsthm}
+\usepackage{amsfonts}       % blackboard math symbols
 \usepackage{enumitem}
 \setlist[itemize]{align=parleft,left=0pt..1em}
 \setlist[enumerate]{align=parleft,left=0pt..1.5em,label=\large\protect\textcircled{\small\arabic*}}
 \usepackage[font=scriptsize]{caption}
-\usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
-\usepackage{microtype}      % microtypography
+\usepackage[final, babel]{microtype}      % microtypography
 \usepackage{graphicx,epstopdf}
 % \usepackage{natbib}
 \usepackage{doi}
@@ -33,11 +53,20 @@
 
 \usepackage{hyperref} % For hyperlinks
 \hypersetup{
-    colorlinks=true,
-    linkcolor=blue,
-    filecolor=magenta,
-    urlcolor=cyan,
+  pdftex,
+  final,
+  colorlinks=true,
+  linkcolor=blue,
+  filecolor=magenta,
+  urlcolor=cyan,
+  breaklinks = true,
+  pdfstartview = FitV,
+  linktocpage = false,
 }
+
+
+\usepackage{draftwatermark}
+\SetWatermarkText{Draft}
 
 \title{SD-BLS}
 
@@ -52,7 +81,7 @@
   Forkbomb B.V.
 }
 
-\renewcommand{\headeright}{Dyne.org}
+\renewcommand{\headeright}{Info @ Dyne.org}
 \renewcommand{\undertitle}{Privacy Preserving Selective Disclosure and Unlinkable Revocation of Verifiable Credentials}
 \renewcommand{\shorttitle}{\textit{SD-BLS}}
 
