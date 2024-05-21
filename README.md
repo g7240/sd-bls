@@ -31,7 +31,7 @@ Do an `apt-get install` of the following packages:
 ```
  texlive-extra-utils texlive-latex-recommended texlive-font-utils \
  texlive-fonts-extra texlive-latex-extra texlive-fonts-recommended \
- texlive-science
+ texlive-science poppler-utils epstool
 ```
 
 Then do `make` to build the latest `sd-bls.pdf` from this repo.
