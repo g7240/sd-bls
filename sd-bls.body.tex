@@ -89,7 +89,7 @@ We will adopt the following notations:
 
 We also require defining the notion of a cryptographic
 pairing. That is defined as a function $e:
-\mathbb{G}_1\times\mathbb{G}_2\to \mathbb{G}_T$, where
+\mathbb{G}_2\times\mathbb{G}_1\to \mathbb{G}_T$, where
 $\mathbb{G}_1,\mathbb{G}_2$ and $\mathbb{G}_T$ are all groups of same
 order $n$, such that satisfies the following properties:
 
@@ -98,12 +98,12 @@ order $n$, such that satisfies the following properties:
 \item [i.] \emph{Bilinearity}, i.e. given $P_1,Q_1\in\mathbb{G}_1$
   and $P_2,Q_2\in\mathbb{G}_2$, we have
   \begin{align*}
-    e(P_1+Q_1,P_2) = e(P_1,P_2)\cdot e(Q_1,P_2) \\
-    e(P_1,P_2+Q_2) = e(P_1,P_2)\cdot e(P_1,Q_2)
+    e(P_2,P_1+Q_1) = e(P_2,P_1)\cdot e(P_2,Q_1)   \\
+    e(P_2+Q_2,P_1) = e(P_2,P_1)\cdot e(Q_2,P_1)
   \end{align*}
 
 \item[ii.] \emph{Non-degeneracy}, meaning that for all
-  $g_1\in\mathbb{G}_1, g_2\in\mathbb{G}_2$, $e(g_1,g_2)\ne
+  $g_1\in\mathbb{G}_1, g_2\in\mathbb{G}_2$, $e(g_2,g_1)\ne
   1_{\mathbb{G}_T}$, the identity element of the group
   $\mathbb{G}_T$;
 
@@ -116,8 +116,8 @@ order $n$, such that satisfies the following properties:
 
 \end{itemize}
 
-For the purpose of our protocol we will have $\mathbb{G}_1 = E_T$ and
-$\mathbb{G}_2 = E$, and $\mathbb{G}_T\subset \mathbb{F}_{p^{12}}$ is
+For the purpose of our protocol we will have $\mathbb{G}_1 = E$ and
+$\mathbb{G}_2 = E_T$, and $\mathbb{G}_T\subset \mathbb{F}_{p^{12}}$ is
 the subgroup containing the $n$-th roots of unity, where $n$ is the
 order of the groups $E$ and $E_T$. Instead $e: E_T \times E\to
 \mathbb{G}_T$ is the \emph{Miller pairing}, which in our work is
