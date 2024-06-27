@@ -5,10 +5,10 @@ Such systems are known as selective disclosure and this article aims at improvin
 
 \subsection{State of the art}
 
-Selective disclosures are being used by nation states across the world in their next generation identity systems, for instance EIDAS2.0 in Europe where the European Digital Identity Wallet Architecture and Reference Framework\cite{eudi-arf} mandates the use of SD-JWT\cite{sd-jwt} and mDOC \cite{mdoc}. Unfortunately both SD-JWT and mDOC adopt for their cryptography just Hash-Based Message Authentication Codes (HMAC) to generate proofs, and they can be easily traced (non-unlinkability).
+Selective disclosures are being used by nation states across the world in their next generation identity systems, for instance EIDAS2.0 in Europe where the European Digital Identity Wallet Architecture and Reference Framework\cite{eudi-arf} mandates the use of SD-JWT\cite{sd-jwt} and mDOC \cite{mdoc}. Unfortunately both SD-JWT and mDOC adopt for their cryptography just Hash-Based Message Authentication Codes (HMAC) to generate proofs, and they can be easily traced (non-unlinkability): recent critical feedback on the EUDI ARF\cite{troncoso} details several problems.
+
 
 In North America the efforts concentrate on the adoption of the the BBS+ algorithm\cite{bbs+} leveraging its Zero Knowledge Proof properties and applied to W3C Verifiable Credentials\cite{w3c-vc} to obtain an higher degree of privacy.
-
 \subsection{Threats considered}
 
 The different choices in data formats in these two approaches is irrelevant in relation with cryptography, any choice between JSON Web Tokens or W3C Verifiable Credentials does not impact the privacy level. But the cryptography adopted determines the adequacy of a solution to face three important threats that can render an algorithm unsuitable to be used in real world situations.
@@ -35,7 +35,7 @@ If the choice of interactive revocation is left to a single issuer, one may unil
 The  cryptographic scheme described in the paper, name \textit{SD-BLS} for brevity,  takes inspiration by modern zero knowledge proofs schemes  such as \cite{bbs+}BBS signatures or Coconut\cite{coconut}.  The paper aims to employ some of the properties of the said schemes, overcome some of the shortcomings of  SD-JWT and mDOC formats, mainly the non-unlinkability of credentials, proposing a novel cryptographic approach to similar data structures. Furthermore SD-BLS proposes novel anonymous cryptographic revocation flow for verifiable credentials, that aims to solve the privacy issues posed by status and revocation lists.
 
 \paragraph{Unlinkabe selective disclosure}
-Similarly to the SD-JWT and mDOC formats, SD-BLS produces an array of claims:  the elements of the array are individually signed by the issuer. In SD-BLS the signature(s) replace the HMAC. Using the homomorphic properties of this curve SD-BLS enables the holder to produce a different \textit{presentation} each time they want to prove a claim. A credential presentation in SD-BLS is in fact a zero knowledge proof offering similar cryptographic properties as \cite{bbs+}BBS signatures or Coconut\cite{coconut} proofs. Given the zero knowledge proof properties of the scheme, SD-BLS can be used to verify credentials off and on blockchain.
+Similarly to the SD-JWT and mDOC formats, SD-BLS produces an array of claims:  the elements of the array are individually signed by the issuer. In SD-BLS the signature(s) replace the HMAC. Using the homomorphic properties of this curve SD-BLS enables the holder to produce a different \textit{presentation} each time they want to prove a claim. SD-BLS can be used to prove credentials in public (on blockchain) when they are boolean attributes.
 
 \paragraph{Anonymous cryptographic revocation}
 SD-BLS proposes a novel approach to credential revocation: the data published by the revocation issuer will produce cryptographic material that contains no information about and is  never linkable to the holder. The cryptographic revocation material allows anyone to verify if an SD-BLS proof produced by a credential holder has been revoked by one or multiple issuers. The unlinkability, and thus anonymity of the cryptographic revocation,  allows the revocation issuer to publish revocations off or on blockchain.
@@ -56,7 +56,7 @@ We are unaware of standardization efforts for interoperable credentials in the f
 As the digital identity and verifiable credential technologies are maturing, they are being considered for usage in less privacy concerning applications, such subscriptions and membership and fidelity cards.
 
 \paragraph{Verifiable credentials on Blockchain}
-Similarly to other zero knowledge proof schemes, SD-BLS can be used on blockchain.
+SD-BLS can be used on blockchain to produce publicly verified proofs when the credentials are made of clear-text messages stating a boolean property or ACL clearance.
 \begin{itemize}
     \item A verifiable presentation can be used by a smart-contract to verify if one or more holder's claim match the requirement needed to process a transaction. The verifiable presentation is anonymous, therefore its storage in the transaction log doesn't pose privacy issues and is GDPR compatible.
     \item Issuers can publish their cryptographic revocation lists on chain, allowing smart-contracts to verify the status of a credential, still granting unlinkability.
@@ -78,11 +78,11 @@ We will adopt the following notations:
   (i.e. of prime order $p$);
 
 \item $E$ denotes the (additive) group of points of the curve
-  BLS381-12 \cite{bls381-12} which can be described with the
+  BLS12-381 \cite{bls381-12} which can be described with the
   Weierstrass form $y^2=x^3 + 16$;
 
 \item $E_T$ represents instead the group of points of the twisted
-  curve of BLS381-12, with embedding degree $k=12$. The order of
+  curve of BLS12-381, with embedding degree $k=12$. The order of
   this group is the same of that of $E$;
 
 \end{itemize}
@@ -315,7 +315,7 @@ This is implemented via an interactive process facilitated by a third party trus
 
 Such a trustee will be in contact with \textit{credential issuers} for the signature of credentials: it will create the $rev$ revocation key while concealing it from them. The trustee then proceeds creating the $\sigma_{rev} = rev \cdot U$ revocation signature and the $r_1 = rev \cdot G_1$ projection as detailed in the issuance phase \eqref{rev_agg}. Finally the revocation trustee will distribute $\sigma_{rev}$ and $r_1$ to issuers for further processing into the final signed credential.
 
-The trustee will then proceed asynchronously to split the revocation key into shares using a public verifiable secret sharing (PVSS \cite{pvss_schoenmakers}) implementation and distribute these shares to all revocation issuers. In order to issue a revocation, a configurable quorum of peers among the revocation issuers will need to reconstruct the secret revocation key and publish it.
+The trustee will then proceed asynchronously to split the revocation key into shares using a public verifiable secret sharing (PVSS \cite{pvss}) implementation and distribute these shares to all revocation issuers. In order to issue a revocation, a configurable quorum of peers among the revocation issuers will need to reconstruct the secret revocation key and publish it.
 
 \section{Benchmarks}
 
@@ -377,8 +377,8 @@ Logarithm. In fact, under these assumptions, we have that our protocol
 satisfies unforgeability, blindness, and unlinkability.
 
 The SD-BLS implementation we are presenting in this paper is
-demonstrated using the BLS381-12 curve \cite{bls381-12} also adopted
-by ETH2.0. Debating the choice of BLS381-12 is beyond the scope of
+demonstrated using the BLS12-381 curve \cite{bls381-12} also adopted
+by ETH2.0. Debating the choice of BLS12-381 is beyond the scope of
 this paper, but is worth mentioning that we can easily switch using the BLS461 curve based on a 461 bit prime, hence upgrading our
 implementation to 128 bit security \cite{updating-key-pairings}
 against attacks looking for discrete logs on elliptic curves
@@ -403,10 +403,10 @@ Therefore, we can investigate the possibility to use SD-BLS to implement a parti
 
 
 \paragraph{Digital Product Passport}
-Efforts in standardization of Digital Product Passport (DPP) are ongoing in both the EU (Cirpass, BatteryPass, Trace4EU) and US (DSCSA). An obstacle to adoption of DPP technologies is the reluctancy of manufacturers to share information about their supply-chain, knowing that the information would become publicly available and immutable due to blockchain storage. While requiring further analysis and investigation, a further development of the SD-BLS scheme could allow creating DPPs built on the zero knowledge proof and selective disclosure principles, which may facilitate the adoption of the technology in the industry.
+Efforts in standardization of Digital Product Passport (DPP) are ongoing in both the EU (Cirpass, BatteryPass, Trace4EU) and US (DSCSA). An obstacle to adoption of DPP technologies is the reluctancy of manufacturers to share information about their supply-chain, knowing that the information would become publicly available and immutable due to blockchain storage. While requiring further analysis and investigation, a further development of the SD-BLS scheme could allow creating DPPs built on the selective disclosure principles, which may facilitate the adoption of the technology in the industry by preserving the privacy of natural persons present in the DPP as REA agents\cite{reflow}, while authenticating their contribution.
 
 \paragraph{DAO Technologies}
-The SD-BLS math is fully compatible with ETH2.0 and can be computed inside an Ethereum VM. If implemented in solidity, it can be a useful building block for more advanced Distributed Autonomous Organizations (DAO \cite{dao}) that want to authenticate peers using on a set of universally recognizable credentials instead of a key based proof of possession.
+The SD-BLS math is fully compatible with ETH2.0 and can be computed inside an Ethereum VM. A verifier implemented in solidity can be a building block for more advanced Distributed Autonomous Organizations (DAO \cite{dao}) that want to authenticate peers using on a set of universally recognizable credentials instead of a key based proof of possession.
 
 % Our preliminary benchmarks suggest that while the computationally heaviest part of cryptographic scheme is the verification, the issuance and the creations of a presentation are computationally relatively inexpensive.
 
