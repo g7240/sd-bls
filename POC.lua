@@ -109,7 +109,7 @@ for m,v in pairs(SIGNED_CLAIMS) do
                    id = m,
                    s = sig + sign(tri, m),
                    p = (revG2 + G2*tri):to_zcash(),
-                   r = G1*er
+                   r = G1*er -- TODO: protect
     })
   end
 end
@@ -141,7 +141,7 @@ end
 
 local torevoke = {
   'HolderID/born_in=Napoli',
-  'HolderID/gender=male',
+--  'HolderID/gender=male',
   'HolderID/nationality=italian'}
 local revocations = {}
 for _,v in pairs(torevoke) do
@@ -163,5 +163,73 @@ for _,proof in pairs(CREDENTIAL_PROOF) do
    local sig = proof.s
    local pk = ECP2.from_zcash(proof.p)
    assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
+   assert( verify(pk + A.pk, proof.id, sig) )
+end
+
+-- found revocation
+local torevoke = {
+  'HolderID/gender=male'
+}
+local revocations = {}
+for _,v in pairs(torevoke) do
+  local k = strtok(v,'/')[2]
+  revocations[k] = REVOCATIONS[v]
+end
+for _,proof in pairs(CREDENTIAL_PROOF) do
+   local sig = proof.s
+   local pk = ECP2.from_zcash(proof.p)
+   if proof.id == 'gender=male' then
+     assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
+   else
+     assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
+   end
+   assert( verify(pk + A.pk, proof.id, sig) )
+end
+
+local function FUZZ(o)
+  t = type(o)
+  assert(iszen(t), "cannot fuzz non zenroom type: "..t)
+  local tmp = o:octet():fuzz_byte()
+  if t == 'zenroom.ecp' then return ECP.new(tmp) end
+  if t == 'zenroom.ecp2' then return ECP2.new(tmp) end
+  if t == 'zenroom.big' then return BIG.new(tmp) end
+  if t == 'zenroom.octet' then return tmp end
+  error("cannot fuzz zenroom type: "..t)
+end
+
+-- random proof.s
+for _,proof in pairs(CREDENTIAL_PROOF) do
+   local sig = ECP.random() -- FUZZ
+   local pk = ECP2.from_zcash(proof.p)
+   if proof.id == 'gender=male' then
+     assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
+   else
+     assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
+   end
+   assert( not verify(pk + A.pk, proof.id, sig) )
+end
+
+-- fuzz proof.p
+for _,proof in pairs(CREDENTIAL_PROOF) do
+   local sig = proof.s
+   local pk = ECP2.random() -- FUZZ
+   if proof.id == 'gender=male' then
+     assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
+   else
+     assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
+   end
+   assert( not verify(pk + A.pk, proof.id, sig) )
+end
+
+-- fuzz proof.r
+for _,proof in pairs(CREDENTIAL_PROOF) do
+   local sig = proof.s
+   local pk = ECP2.from_zcash(proof.p)
+   proof.r = ECP.random() -- FUZZ(proof.r)
+   if proof.id == 'gender=male' then
+     assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
+   else
+     assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
+   end
    assert( verify(pk + A.pk, proof.id, sig) )
 end
