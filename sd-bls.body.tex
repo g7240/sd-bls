@@ -1,24 +1,78 @@
 \section{Introduction}
-Digital identity systems implement credential issuance and presentation mechanisms so that a person (holder) can voluntarily disclose his or her own acquired skills, professed attributes, or completed accomplishments. Credentials are signed by issuer authorities and encapsulated within various forms of digital proofs to be held in digital wallets, empowering individuals to reveal only chosen details to designated recipients, to limit data exposure and permit a user-controlled release of information.
+Digital identity systems implement credential issuance and
+presentation mechanisms so that a person (holder) can voluntarily
+disclose his or her own acquired skills, professed attributes, or
+completed accomplishments. Credentials are signed by issuer
+authorities and encapsulated within various forms of digital proofs to
+be held in digital wallets, empowering individuals to reveal only
+chosen details to designated recipients, to limit data exposure and
+permit a user-controlled release of information.
 
-Such systems are known as selective disclosure and they enhance users privacy by allowing data minimization when proving credentials.
+Such systems are known as selective disclosure and they enhance users
+privacy by allowing data minimization when proving credentials.
 \subsection{State of the art}
 
-Selective disclosures are being used by nation states across the world in their next generation identity systems, for instance EIDAS2.0 in Europe where the European Digital Identity Wallet Architecture and Reference Framework\cite{eudi-arf} mandates the use of SD-JWT\cite{sd-jwt} and mDOC \cite{mdoc}. Unfortunately both SD-JWT and mDOC adopt for their cryptography just Hash-Based Message Authentication Codes (HMAC) to generate proofs, and they can be easily traced (non-unlinkability): recent critical feedback on the EUDI ARF\cite{troncoso} details several problems.
+Selective disclosures are being used by nation states across the world
+in their next generation identity systems, for instance EIDAS2.0 in
+Europe where the European Digital Identity Wallet Architecture and
+Reference Framework\cite{eudi-arf} mandates the use of
+SD-JWT\cite{sd-jwt} and mDOC \cite{mdoc}. Unfortunately both SD-JWT
+and mDOC adopt for their cryptography just Hash-Based Message
+Authentication Codes (HMAC) to generate proofs, and they can be easily
+traced (non-unlinkability): recent critical feedback on the EUDI
+ARF\cite{troncoso} details several problems.
 
 
-In North America the efforts concentrate on the adoption of the the BBS+ algorithm\cite{bbs+} leveraging its Zero Knowledge Proof properties and applied to W3C Verifiable Credentials\cite{w3c-vc} to obtain an higher degree of privacy by making every disclosure unlinkable.
+In North America the efforts concentrate on the adoption of the the
+BBS+ algorithm\cite{bbs+} leveraging its Zero Knowledge Proof
+properties and applied to W3C Verifiable Credentials\cite{w3c-vc} to
+obtain an higher degree of privacy by making every disclosure
+unlinkable.
 \subsection{Threats considered}
 
-The different choices in data formats in these two approaches is irrelevant in relation with cryptography, any choice between JSON Web Tokens or W3C Verifiable Credentials does not impact the privacy level. But the cryptography adopted determines the adequacy of a solution to face three important threats that can render an algorithm unsuitable to be used in real world situations.
+The different choices in data formats in these two approaches is
+irrelevant in relation with cryptography, any choice between JSON Web
+Tokens or W3C Verifiable Credentials does not impact the privacy
+level. But the cryptography adopted determines the adequacy of a
+solution to face three important threats that can render an algorithm
+unsuitable to be used in real world situations.
 
 \paragraph{Linkability}
 
-The EUDI-ARF standard dictates that credentials \textit{issued} to a holder, can be \textit{presented} (in the form of a verifiable presentation) to a relying party in order to have one or more attributes verified. Every verifiable presentation includes one or more HMAC(s), formatted in SD-JWT: the HMACs are identical each time a verifiable presentation is produced from a certain credential. This makes possible for colluding relying parties, or to malicious actors, to trace a holder's identity by collecting, exchanging and confronting verifiable presentations (linkability). This threat appears to be well mitigated by BBS+ through its Zero Knowledge Proof implementation.
+The EUDI-ARF standard dictates that credentials \textit{issued} to a
+holder, can be \textit{presented} (in the form of a verifiable
+presentation) to a relying party in order to have one or more
+attributes verified. Every verifiable presentation includes one or
+more HMAC(s), formatted in SD-JWT: the HMACs are identical each time a
+verifiable presentation is produced from a certain credential. This
+makes possible for colluding relying parties, or to malicious actors,
+to trace a holder's identity by collecting, exchanging and confronting
+verifiable presentations (linkability). This threat appears to be well
+mitigated by BBS+ through its Zero Knowledge Proof implementation.
 
 \paragraph{Privacy breach of revocation lists}
 
-We believe that anonymous revocations are a \textit{condicio sine qua non} to guarantee a sufficient level of privacy in digital identities and credentials. There is no privacy-preserving revocation system designed, either in EUDI-ARF, or in W3C-VC and BBS+. In case the choice of strategy for revocation is left open to developers, the risk for major privacy breaches may occur, for example with the adoption of public status lists \cite{crlcomparison}. The hypotetical use of a certificate status lists (CRL) presents issues related primarily to privacy \cite{CRL}, because sensitive information about holders leaks from the list. This problem is partially mitigated by expiration dates, in cases where credentials can be short-lived (typically less important credentials), but not applicable with digital identification documents such as ID, driving license, passport and social security numbers, which typically have longer or no expiration time. Future plans for the national standards we are observing include the adoption of ``Bitstring'' status lists \cite{status-lists} which may grant a degree of privacy. Our approach is that of designing a privacy-preserving revocation mechanism to remove the leak of holder's information and allow to delegate the governance of revocations to multiple revocation issuers which may be different from the credential issuer.
+We believe that anonymous revocations are a \textit{condicio sine qua
+  non} to guarantee a sufficient level of privacy in digital
+identities and credentials. There is no privacy-preserving revocation
+system designed, either in EUDI-ARF, or in W3C-VC and BBS+. In case
+the choice of strategy for revocation is left open to developers, the
+risk for major privacy breaches may occur, for example with the
+adoption of public status lists \cite{crlcomparison}. The hypotetical
+use of a certificate status lists (CRL) presents issues related
+primarily to privacy \cite{CRL}, because sensitive information about
+holders leaks from the list. This problem is partially mitigated by
+expiration dates, in cases where credentials can be short-lived
+(typically less important credentials), but not applicable with
+digital identification documents such as ID, driving license, passport
+and social security numbers, which typically have longer or no
+expiration time. Future plans for the national standards we are
+observing include the adoption of ``Bitstring'' status lists
+\cite{status-lists} which may grant a degree of privacy. Our approach
+is that of designing a privacy-preserving revocation mechanism to
+remove the leak of holder's information and allow to delegate the
+governance of revocations to multiple revocation issuers which may be
+different from the credential issuer.
 
 %% - https://github.com/ministero-salute/it-dgc-verificaC19-android/issues/103
 %% - https://osf.io/preprints/lawarxiv/yc6xu
@@ -26,7 +80,19 @@ We believe that anonymous revocations are a \textit{condicio sine qua non} to gu
 
 \paragraph{Revocation issuer corruption}
 
-If the choice of interactive revocation is left to a single issuer, one may unilaterally choose to revoke credentials, without being subject to revision or having to seek consensus with a quorum of issuers. This situation leads to security issues in case Issuers are corrupted and make a weaponized use of digital revocations to persecute engaged individuals. Such a condition becomes a real concern for journalists or activists living under dictatorial regimes that may arbitrarily revoke their credentials, or even ID cards and passports. Similarly, a security breach of an issuer service, would result in similar threats. We mitigate this risk by introducing the possibility for threshold issuance of revocation keys and by separating the responsibility of revocation issuance and credential issuance.
+If the choice of interactive revocation is left to a single issuer,
+one may unilaterally choose to revoke credentials, without being
+subject to revision or having to seek consensus with a quorum of
+issuers. This situation leads to security issues in case Issuers are
+corrupted and make a weaponized use of digital revocations to
+persecute engaged individuals. Such a condition becomes a real concern
+for journalists or activists living under dictatorial regimes that may
+arbitrarily revoke their credentials, or even ID cards and
+passports. Similarly, a security breach of an issuer service, would
+result in similar threats. We mitigate this risk by introducing the
+possibility for threshold issuance of revocation keys and by
+separating the responsibility of revocation issuance and credential
+issuance.
 
 \paragraph{Feature Comparison}
 
@@ -43,47 +109,94 @@ BBS+   & yes         & wip         & no          \\ \hline
 \label{tab:features}
 \end{table}
 
-We briefly round up on feature differences between the named selective disclosure cryptographic schemes, as shown in table \ref{tab:features}, mainly distinguishing between three fundamental features:
+We briefly round up on feature differences between the named selective
+disclosure cryptographic schemes, as shown in table
+\ref{tab:features}, mainly distinguishing between three fundamental
+features:
 \begin{itemize}
 \item UP: Unlinkable Presentation
 \item UR: Unlinkable Revocation
 \item TR: Threshold Revocation
 \end{itemize}
 
-Where \emph{wip} is mentioned meaning work in progress on adoption of bitstring status lists for unlinkable revocations.
+Where \emph{wip} is mentioned meaning work in progress on adoption of
+bitstring status lists for unlinkable revocations.
 
 \section{Overview}
 
 \subsection{Key contributions}
-The cryptographic scheme described in this paper, named \textit{SD-BLS} for brevity, implements some of the properties of the SD-JWT scheme (which can be easily encoded in mDOC format) and proposes a novel cryptographic approach to similar data structures. Furthermore SD-BLS proposes novel anonymous cryptographic revocation flow for verifiable credentials, that aims to solve the privacy issues posed by status and revocation lists.
+The cryptographic scheme described in this paper, named
+\textit{SD-BLS} for brevity, implements some of the properties of the
+SD-JWT scheme (which can be easily encoded in mDOC format) and
+proposes a novel cryptographic approach to similar data
+structures. Furthermore SD-BLS proposes novel anonymous cryptographic
+revocation flow for verifiable credentials, that aims to solve the
+privacy issues posed by status and revocation lists.
 
 \paragraph{Unlinkabe selective disclosure}
-Similarly to the SD-JWT and mDOC formats, SD-BLS produces an array of claims:  the elements of the array are individually signed by the issuer. In SD-BLS the signature(s) replace the HMAC. Using the homomorphic properties of this curve SD-BLS enables the holder to selectively disclose only certain issuer signed claims and produce a \textit{presentation} that minimizes private information given to verifiers.
+Similarly to the SD-JWT and mDOC formats, SD-BLS produces an array of
+claims: the elements of the array are individually signed by the
+issuer. In SD-BLS the signature(s) replace the HMAC. Using the
+homomorphic properties of this curve SD-BLS enables the holder to
+selectively disclose only certain issuer signed claims and produce a
+\textit{presentation} that minimizes private information given to
+verifiers.
 
 \paragraph{Anonymous cryptographic revocation}
-SD-BLS proposes a novel approach to credential revocation: the data published by the revocation issuer will produce cryptographic material that contains no information about the credential holders. The cryptographic revocation material allows anyone to verify if an SD-BLS proof produced by a credential holder has been revoked by one or multiple issuers. The unlinkability, and thus anonymity of the cryptographic revocation,  allows the revocation issuer to share revocations in public and allows anyone to verify if credentials have been revoked.
+SD-BLS proposes a novel approach to credential revocation: the data
+published by the revocation issuer will produce cryptographic material
+that contains no information about the credential holders. The
+cryptographic revocation material allows anyone to verify if an SD-BLS
+proof produced by a credential holder has been revoked by one or
+multiple issuers. The unlinkability, and thus anonymity of the
+cryptographic revocation, allows the revocation issuer to share
+revocations in public and allows anyone to verify if credentials have
+been revoked.
 
 \subsection{Applications}
-In this section we present some applications and use cases for digital identity and credentials, that could benefit from using the SD-BLS scheme.
+In this section we present some applications and use cases for digital
+identity and credentials, that could benefit from using the SD-BLS
+scheme.
 
 \paragraph{Digital identity}
-The focus of the EUDI-ARF specifications is identity documents: it defines mechanisms and data structures to issue a Personal Identification (PID) as well as digital driving licenses. Similarly, the US government is experimenting with W3C-VC and mDOC for cross-states interoperable driving licenses. SD-BLS data format is similar to SD-JWT and mDOC, offering selective disclosure and anonymous revocation.
+The focus of the EUDI-ARF specifications is identity documents: it
+defines mechanisms and data structures to issue a Personal
+Identification (PID) as well as digital driving licenses. Similarly,
+the US government is experimenting with W3C-VC and mDOC for
+cross-states interoperable driving licenses. SD-BLS data format is
+similar to SD-JWT and mDOC, offering selective disclosure and
+anonymous revocation.
 
 \paragraph{Academic credentials}
-Diploma and academic credentials are among the core offerings of EBSI as well as a primary research target of the W3C VC working group.
+Diploma and academic credentials are among the core offerings of EBSI
+as well as a primary research target of the W3C VC working group.
 
 \paragraph{KYC/AML}
-We are unaware of standardization efforts for interoperable credentials in the fields of "Know Your Customer" (KYC) and Anti Money-Laundering (AML) certifications. We are aware of solution providers experimenting with W3C-VC for AML applications and believe SD-BLS can greatly improve the governance of credential revocation, which is a critical component for this use case.
+We are unaware of standardization efforts for interoperable
+credentials in the fields of "Know Your Customer" (KYC) and Anti
+Money-Laundering (AML) certifications. We are aware of solution
+providers experimenting with W3C-VC for AML applications and believe
+SD-BLS can greatly improve the governance of credential revocation,
+which is a critical component for this use case.
 
 \paragraph{Generic \textit{light} credentials}
-As the digital identity and verifiable credential technologies are maturing, they are being considered for usage in less privacy concerning applications, such subscriptions and membership and fidelity cards.
+As the digital identity and verifiable credential technologies are
+maturing, they are being considered for usage in less privacy
+concerning applications, such subscriptions and membership and
+fidelity cards.
 
 \paragraph{Verifiable credentials on Blockchain}
-SD-BLS can be used with blockchain-based smart-contracts to activate certain functions:
+SD-BLS can be used with blockchain-based smart-contracts to activate
+certain functions:
 \begin{itemize}
-    \item A verifiable presentation can be used by a smart-contract to verify if one or more holder's claim match the requirement needed to process a transaction.
-    \item Issuers can publish their cryptographic revocation lists on chain, allowing smart-contracts to verify the status of a credential.
-    \item The issuer's public keys can also be published on-chain, although this does not represent a novelty.
+    \item A verifiable presentation can be used by a smart-contract to
+      verify if one or more holder's claim match the requirement
+      needed to process a transaction.
+    \item Issuers can publish their cryptographic revocation lists on
+      chain, allowing smart-contracts to verify the status of a
+      credential.
+    \item The issuer's public keys can also be published on-chain,
+      although this does not represent a novelty.
 \end{itemize}
 
 \section{Implementation}
