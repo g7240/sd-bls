@@ -28,6 +28,30 @@ We believe that anonymous revocations are a \textit{condicio sine qua non} to gu
 
 If the choice of interactive revocation is left to a single issuer, one may unilaterally choose to revoke credentials, without being subject to revision or having to seek consensus with a quorum of issuers. This situation leads to security issues in case Issuers are corrupted and make a weaponized use of digital revocations to persecute engaged individuals. Such a condition becomes a real concern for journalists or activists living under dictatorial regimes that may arbitrarily revoke their credentials, or even ID cards and passports. Similarly, a security breach of an issuer service, would result in similar threats. We mitigate this risk by introducing the possibility for threshold issuance of revocation keys and by separating the responsibility of revocation issuance and credential issuance.
 
+\paragraph{Feature Comparison}
+
+\begin{table}[]
+\centering
+\begin{tabular}{cccc}
+\hline
+       & \textbf{UP} & \textbf{UR} & \textbf{TR} \\ \hline
+SD-BLS & no          & yes         & yes         \\ \hline
+SD-JWT & no          & wip         & no          \\ \hline
+BBS+   & yes         & wip         & no          \\ \hline
+\end{tabular}
+\caption{feature comparison}
+\label{tab:features}
+\end{table}
+
+We briefly round up on feature differences between the named selective disclosure cryptographic schemes, as shown in table \ref{tab:features}, mainly distinguishing between three fundamental features:
+\begin{itemize}
+\item UP: Unlinkable Presentation
+\item UR: Unlinkable Revocation
+\item TR: Threshold Revocation
+\end{itemize}
+
+Where \emph{wip} is mentioned meaning work in progress on adoption of bitstring status lists for unlinkable revocations.
+
 \section{Overview}
 
 \subsection{Key contributions}
