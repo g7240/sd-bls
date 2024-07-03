@@ -197,18 +197,17 @@ BLS signatures also support aggregation: it is possible to aggregate a collectio
 
 Since $\sigma_i\in G_1 \forall i$, the algorithm has an homomorphic property. We exploit this property to add a revocation signature into the signed credential.
 
-We create a new secret key $rev$ with public key $r_2$, then compute the point $r_1 \in \mathbb{G}_1$ and signature of the claim $\sigma_{rev}$ to add to the issuer signature:
+We create a new secret key $rev$ with public key $r$ and signature of the claim $\sigma_{rev}$ to add to the issuer signature:
 \begin{equation*}\label{rev_agg}
     \begin{split}
-        r_2 &= rev \cdot G_2 \\
-        r_1 &= rev \cdot G_1 \\
+        r &= rev \cdot G_2 \\
         \sigma_{rev} &= rev \cdot U\\
         \sigma &= sk\cdot U + \sigma_{rev}\\
    \end{split}
 \end{equation*}
 The set of all the signed claims will be:
 \begin{equation*}
-   \mathcal{C} = \big\{ \{ r_{1i}, r_{2i}, \sigma_i \} : i\in claims  \big\}
+   \mathcal{C} = \big\{ \{id, r, \sigma \} : id\in claims  \big\}
 \end{equation*}
 
 At the end of this phase the holder is sent the \textit{signed claims}
@@ -220,107 +219,59 @@ issue revocations.
 
 \subsection{Presentation} \label{presentation}
 
-As we have done in the issuance phase (\ref{issuance}), we exploit the
-homomorphic property of BLS signatures once again, but this time to
-render the presented signature unlinkable (impossible to trace across
-multiple presentations) by adding a "blinding factor" signature to the
-one provided by the issuer.
-
-Let $\mathcal{H}$ denote a cryptographic hash function (e.g. SHA-256) and let $\varepsilon$ be an integer chosen uniformly at random that serves as the blinding factor.
-Using the same technique of the Tripartite Diffie-Hellman Key Exchange \cite{tripartite} we construct a secret that is binded to the blinding factor, the Issuer public key and the "revocation point" $r_1 = rev \cdot G_1$ computed in the issuance phase:
-
-\begin{equation}\label{tau_f}
-    \tau = \mathcal{H}(e(A.pk, r_1)^{\varepsilon})
-\end{equation}
-
-When the holder needs to disclose a particular claim $m$ we construct the credential proof as follow:
-let $\sigma$ be the signature of the claim provided by the Issuer, then apply the blinding factor to the signature using the secret $\tau$
-\begin{equation}\label{claim.s}
-    s = \sigma + sign(\tau, m)
-\end{equation}
-and the corresponding public key computed as
-\begin{equation*}
-    p = r_2 + G_2 \cdot \tau
-\end{equation*}
-where $r_2$ is the revocation key linked to the claim.
-We also attach the public key $r = G_1 \cdot \varepsilon$ that correspond to the secret key $\varepsilon$.
+When the holder needs to disclose a particular claim $id$ it is sufficient to send the signed claim set $\{id, r, \sigma \}$.
 
 \subsection{Verification}
 
-Credential verification is made by checking that the issuer has signed the blinded proof being presented. In order to do that the credential issuer's public key must be added to the proof.\\
+Credential verification is made by checking the presented issuer's signature. In order to do that the credential issuer's public key must be added to the revocation public key.\\
 As explained in section \ref{presentation} we can consider the credential proof as a collection of tables of the following form:
 \begin{equation*}
-    c_p = \{id, p, r, s \}
+    c_{id} = \{id, r, \sigma \}
 \end{equation*}
-where $s$ and $p$ are respectively the signature and the public key of the credential proof of the string $id$
-after verifying the status of the revocation, we can check the validity of the presented claim computing the key
+where $\sigma$ and $r$ are respectively the signature of the string $id$ and the revocation public key.
+We can check the validity of the presented claim computing the key
 \begin{equation*}
-    pk = A.pk + p
+    pk = A.pk + r
 \end{equation*}
-and verify the bls signature.
+and verify the bls signature $\sigma$.
 
 \subsubsection{Proof of correctness}
 % (questa è praticamente una proof dell'homomorphic property...)
-The signature $s$ is given by
+The signature $\sigma$ is given by
 \begin{equation*}
 \begin{split}
-    s &= \sigma + sign(\tau, id) \quad \text{where} \\
     \sigma &= sign(A.sk, id) + sign(rev, id) \\
-    \text{so} \quad s &= A.sk U + rev U + \tau U
+     &= A.sk U + rev U
 \end{split}
 \end{equation*}
 where $U$ is the mapping of the string $id$ in the group $G_1$.\\
 Recalling the verification formula, it holds that:
 \begin{equation*}
 \begin{split}
- e(pk, U) &= e(A.skG_2 + revG_2 + \tau G_2, U) \\
- &= e(A.skG_2 + revG_2)\cdot e(\tau G_2, U) \\
- &= e(A.skG_2, U) \cdot e(revG_2, U) \cdot e(\tau G_2, U) \\
- &= e(G_2, A.sk U) \cdot e(G_2, rev U) \cdot e(G_2, \tau U) \\
- &= e(G_2, A.sk U) \cdot e(G_2, rev U + \tau U) \\
- &= e(G_2, A.sk U + rev U + \tau U) \\
- &= e(G_2, s) \\
+ e(pk, U) &= e(A.skG_2 + revG_2, U) \\
+ &= e(A.skG_2, U) \cdot e(revG_2, U) \\
+ &= e(G_2, A.sk U) \cdot e(G_2, rev U) \\
+ &= e(G_2, A.sk U + rev U) \\
+ &= e(G_2, \sigma) \\
 \end{split}
 \end{equation*}
-where each equality holds for the bilinearity of the Miller loop.
+where each equality holds for the bilinearity of the Miller loop.\\
+
+This concludes the first verification phase. If the given presentation is valid, then the verifier should proceed to check the revocation status of the credential as explained below.
 
 \subsection{Revocation}
 
 To make sure no revocation has been emitted for each credential, we update the revocation list from the issuer. A revocation list can be publicly distributed since revocation keys do not provide any information on the identity of holders, unless they are presented in a verification.
 
-Given an element $c_p = \{id, p, r, s \}$ of the credential proof table and the Issuer public key $A.pk$, if the claim id is present in the revocation list we can take the corresponding revocation private key $rev$ and compute the factor $\tau$ as
-\begin{equation}\label{tau}
-        \tau = \mathcal{H}(e(A.pk, r)^{rev})
-\end{equation}
-
-The equation \eqref{tau} gives the same result as \eqref{tau_f} since using the bilinearity of the pairing \cite{tripartite} we have:
+Given an element $c_{id} = \{id, r, \sigma \}$ of the credential presentation and the Issuer public key $A.pk$, if the claim id is present in the revocation list, we can take the corresponding revocation private key $rev$.\\
+We can verify the validity of the revocation by checking if the revocation public key presented by the holder match:
 \begin{equation*}
-    \begin{split}
-        \tau &= \mathcal{H}(e(A.pk, r)^{rev}) \\
-        &= \mathcal{H}(e(A.pk, G_1 \cdot \varepsilon)^{rev}) \\
-        &= \mathcal{H}(e(A.pk, G_1)^{rev \cdot \varepsilon}) \\
-        &= \mathcal{H}(e(A.pk, G_1 \cdot rev)^{\varepsilon}) \\
-        &= \mathcal{H}(e(A.pk, r_1)^{\varepsilon})
-    \end{split}
+    r = G_2 \cdot rev
 \end{equation*}
-
-Then we can verify if a credential claim has been revoked checking first if the revocation public key match:
-\begin{equation*}
-    G_2 \cdot rev = p - G_2 \cdot \tau
-\end{equation*}
-and then verify the following signature with the issuer's public key (pk):
-\begin{equation}\label{sig_minus}
-    sig = s - sign(\tau, id) - sign(rev, id)
-\end{equation}
-This signature should be verified with the issuer's pk since:
-\begin{equation*}
-    \begin{split}
-        s &= \sigma + sign(\tau, id) \quad \text{from \eqref{claim.s}} \\
-        &=  sign(sk, id) + sign(rev, id) + sign(\tau, id)
-    \end{split}
-\end{equation*}
-then exploiting the homomorphic property of BLS signature
-we got that $sig$ in \eqref{sig_minus} is signed using the issuer's private key.
+This step, together with the signature verification, is sufficient to guarantee the revocation status.\\
+Indeed if a dishonest holder provides a wrong $r$, then the verification of the signature will fail, and the given credential is not considered valid.\\
+On the other hand to modify the revocation list in such a way that the verification is successful, the revocation secret key must be forged.\\
+If it happens that the signature verification is successful, but the key does not match, one can conclude that the revocation list has been modified by a third party.
 
 \subsection{Threshold Revocation}
 
