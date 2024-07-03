@@ -303,13 +303,13 @@ Lab measurements on a growing number of claims show that issuance is less comput
     \label{fig:issueproveverify}
 \end{figure}
 
-Based on our benchmarks, the resulting data objects sizes are:
+Based on our benchmarks, the resulting data objects sizes, excluding the signed material which can be either of variable length or fixed length hashes, are:
 \begin{itemize}
-    \item Proof:  226 Bytes
-    \item Revocation: 64 Bytes
+    \item Proof:  145 Bytes
+    \item Revocation: 32 Bytes
 \end{itemize}
 
-The computational cost grows for the verification phase with the presence of a cryptographic revocations list. We assume that revocations are grouped by claim type or credential structure, for instance all revocations of a certain claim (e.g.: "is above 18" or "is a Danish citizen") for any holder are published in the same list: this will not degrade the level of privacy and will group all the revocations in smaller lists.
+The computational cost grows for the verification phase with the presence of a cryptographic revocations list. We assume that revocations are grouped by claim type or credential structure, for instance all revocations of a certain common claim (e.g.: "is above 18" or "is a Danish citizen") for any holder are published in the same list: this will not degrade the level of privacy and will group some revocations in smaller lists.
 
 Lab measurements of the time taken by a single proof verification process to operate on a growing number of revocations demonstrate that there is a linear growth, as shown in figure \ref{fig:verifyrevocations}.
 

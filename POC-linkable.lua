@@ -101,7 +101,8 @@ print(JSON.encode({
           verifier = 'IssuerID',
           revocations = revocations
 }))
-
+I.schema({proof=CREDENTIAL_PROOF,
+          rev=revocations})
 -- relying party verifies credentials
 -- downloads PK of IssuerID from DID
 for _,proof in pairs(CREDENTIAL_PROOF) do
@@ -118,7 +119,7 @@ warn('random proof.s')
 for _,proof in pairs(CREDENTIAL_PROOF) do
   proof.s = ECP.random() -- FUZZ
   assert( not verify(ECP2.from_zcash(proof.r) + A.pk,
-                 proof.id, proof.s) )
+                     proof.id, proof.s) )
   if proof.id == 'gender=male' then
     assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
   else
@@ -128,23 +129,19 @@ end
 
 warn('random proof.r')
 for _,proof in pairs(CREDENTIAL_PROOF) do
-   proof.r = ECP2.random():to_zcash() -- FUZZ
-   assert( not verify(ECP2.from_zcash(proof.r) + A.pk,
-                      proof.id, proof.s) )
-   -- if proof.id == 'gender=male' then
-   --   assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
-   -- else
-     assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
-     -- end
+  proof.r = ECP2.random():to_zcash() -- FUZZ
+  assert( not verify(ECP2.from_zcash(proof.r) + A.pk,
+                     proof.id, proof.s) )
+  assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
 end
 
 warn('random A.pk')
 for _,proof in pairs(CREDENTIAL_PROOF) do
-   assert( not verify(ECP2.from_zcash(proof.r) + ECP2.random(),
-                      proof.id, proof.s) )
-   if proof.id == 'gender=male' then
-     assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
-   else
-     assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
-   end
+  assert( not verify(ECP2.from_zcash(proof.r) + ECP2.random(),
+                     proof.id, proof.s) )
+  -- if proof.id == 'gender=male' then
+  --   assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
+  -- else
+    assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
+    -- end
 end
