@@ -467,9 +467,19 @@ revealing their content.
 
 \section{Benchmarks}
 
-We implemented the flows for credential issuance, presentation, verification and revocation for lab tests using Zenroom \footnote{Zenroom home: https://zenroom.org}, a secure isolated execution environment implementing advanced cryptography transformations. The reference implementation for this paper is published on a public repository \footnote{SD-BLS github repository: https://github.com/dyne/sd-bls}. All benchmarks were executed on a 6th gen. Intel PC running tests on a single i7 3.40GHz core and making no use of hardware acceleration.
+We implemented the flows for credential issuance, presentation,
+verification and revocation for lab tests using
+Zenroom \footnote{Zenroom home: https://zenroom.org}, a secure
+isolated execution environment implementing advanced cryptography
+transformations. The reference implementation for this paper is
+published on a public repository \footnote{SD-BLS github repository:
+https://github.com/dyne/sd-bls}. All benchmarks were executed on a 6th
+gen. Intel PC running tests on a single i7 3.40GHz core and making no
+use of hardware acceleration.
 
-Lab measurements on a growing number of claims show that issuance is less computation heavy than verification, as shown in figure \ref{fig:issueproveverify}.
+Lab measurements on a growing number of claims show that issuance is
+less computation heavy than verification, as shown in figure
+\ref{fig:issueproveverify}.
 
 \begin{figure}
     \centering
@@ -496,6 +506,16 @@ Lab measurements of the time taken by a single proof verification process to ope
     \caption{Speed of verification of a claim over multiple revocations}
     \label{fig:verifyrevocations}
 \end{figure}
+
+The threshold operated for revocation issuers consists of a verifiable secret sharing implementation supporting a configurable total and quorum of peers. Our implementation shows very good performance on reconstruction, which is the most speed-sensitive operation in scenarios where responsive revocation process is required. The process of reconstruction can be easily scaled for asynchronous consensus on a micro-service swarm architecture and verified on blockchain.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{pvss.eps}
+    \caption{Speed of creation and reconstruction of shares among multiple peers}
+    \label{fig:pvss}
+\end{figure}
+
 
 %---------
 
@@ -533,13 +553,20 @@ different computational means and SD-BLS may then be vulnerable to
 quantum-computing attacks. However this is speculative reasoning on
 what we can expect from the future.
 
+The SD-BLS implementation we present in this paper doesn't integrate
+any protection against replay-attacks, nor implements timestamps and
+expiration. We believe security features protecting from
+replay-attacks can be easily added and adapted from the context of
+deployment. I absence of session management providing such
+protections, any real-world use of SD-BLS should contemplate adding a
+signed timestamp to presentations and expiration checks on
+verifications.
+
 \subsection{Future development}
 
 In this section we describe possibilities for expanding the algorithm
 to cover further applications, which appear promising while requiring
 further investigation.
-
-\paragraph{Key-value claims}
 
 \paragraph{Compatibility with EUDI-ARF}
 
@@ -563,6 +590,17 @@ an extended SD-JWT format. Also we can explore useful integrations
 with the European Blockchain Services Infrastructure (EBSI
 \cite{ebsi}).
 
+\paragraph{Signroom and DIDroom}
+
+In SD-BLS both credential issuers and revocation issuers are in charge
+of various interactive administrative operations, while the dealing of
+revocation shares can be easily automated.
+
+We plan to integrate SD-BLS in the free and open source software
+``Signroom'', an application we developed in the context of the NGI
+ASSURE grant, and ``DIDroom'' the dashboard connected to our
+\emph{did:dyne} W3C DID domain.
+
 \paragraph{Digital Product Passport}
 Efforts in standardization of Digital Product Passport (DPP) are
 ongoing in both the EU (Cirpass, BatteryPass, Trace4EU) and US
@@ -584,7 +622,17 @@ building block for more advanced Distributed Autonomous Organizations
 disclosure of verifiable credentials instead of a key based proof of
 possession.
 
-% Our preliminary benchmarks suggest that while the computationally heaviest part of cryptographic scheme is the verification, the issuance and the creations of a presentation are computationally relatively inexpensive.
+
+\section{Acknowledgements}
+This work has been funded by the EU in the framework of the NGI
+TRUSTCHAIN project, grant No 101093274. We thank Puria Nafisi Azizi
+and Matteo Cristino for their infatiguable work on Zenroom, Luca Di
+Domenico for his help on the PVSS implementation, Giuseppe De Marco
+for sharing findings from his pioneering journey, Simone Onofri for
+his insights on threat models and Gabriele Bellini for his helpful
+security review. We extend our thanks the anonymous reviewers for
+their valuable advice and the De Cifris association for facilitating
+connections over a large network of unique professionals.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

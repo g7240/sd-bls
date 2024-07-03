@@ -36,7 +36,7 @@ function sign(sk, msg)
 end
 
 A = keygen()
-sha256 = HASH.new('sha256')
+-- sha256 = HASH.new('sha256')
 
 function verify(pk, msg, sig)
 -- e(γ,H(m)) == e(G2,σ)
