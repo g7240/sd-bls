@@ -10,24 +10,24 @@ permit a user-controlled release of information.
 
 Such systems are known as selective disclosure and they enhance users
 privacy by allowing data minimization when proving credentials.
+
 \subsection{State of the art}
 
 Selective disclosures are being used by nation states across the world
 in their next generation identity systems, for instance EIDAS2.0 in
 Europe where the European Digital Identity Wallet Architecture and
 Reference Framework\cite{eudi-arf} mandates the use of
-SD-JWT\cite{sd-jwt} and mDOC \cite{mdoc}. Unfortunately both SD-JWT
-and mDOC adopt for their cryptography just Hash-Based Message
-Authentication Codes (HMAC) to generate proofs, and they can be easily
-traced (non-unlinkability): recent critical feedback on the EUDI
-ARF\cite{troncoso} details several problems.
+SD-JWT\cite{sd-jwt} and mDOC \cite{mdoc}. SD-JWT adopts for its
+cryptography Hash-Based Message Authentication Codes (HMAC) to
+generate proofs: such presentations can be traced and recent critical
+feedback on the EUDI ARF\cite{troncoso} details this problem.
 
-
-In North America the efforts concentrate on the adoption of the the
+In North America the efforts concentrate on the adoption of the
 BBS+ algorithm\cite{bbs+} leveraging its Zero Knowledge Proof
 properties and applied to W3C Verifiable Credentials\cite{w3c-vc} to
 obtain an higher degree of privacy by making every disclosure
 unlinkable.
+
 \subsection{Threats considered}
 
 The different choices in data formats in these two approaches is
@@ -133,7 +133,7 @@ structures. Furthermore SD-BLS proposes novel anonymous cryptographic
 revocation flow for verifiable credentials, that aims to solve the
 privacy issues posed by status and revocation lists.
 
-\paragraph{Unlinkabe selective disclosure}
+\paragraph{Selective disclosure}
 Similarly to the SD-JWT and mDOC formats, SD-BLS produces an array of
 claims: the elements of the array are individually signed by the
 issuer. In SD-BLS the signature(s) replace the HMAC. Using the
@@ -201,7 +201,9 @@ certain functions:
 
 \section{Implementation}
 
-In this section we will provide a detailed description of the algorithm we propose for selective disclosure and unlinkable revocation using BLS signatures.
+In this section we will provide a detailed description of the
+algorithm we propose for selective disclosure and unlinkable
+revocation using BLS signatures.
 
 \subsection{Notations and assumptions}
 
@@ -264,12 +266,11 @@ As for other well known algorithms BLS signing will work following
 three main steps:
 \begin{itemize}
 
-\item \textbf{Key Generation phase.} For an issuer who wants to sign
-  a credential $m$, a secret key $sk$ is a random number chosen
-  uniformly in $\mathbb{F}_n$, where $n$ is the order of the
-  groups $\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T$. The
-  corresponding public key $pk$ is the element $sk\cdot G_2\in
-  E_T$;
+\item \textbf{Key Generation phase.} For an issuer who wants to sign a
+  credential $m$, a secret key $sk$ is a random number chosen
+  uniformly in $\mathbb{F}_n$, where $n$ is the order of the groups
+  $\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T$. The corresponding public
+  key $pk$ is the element $sk\cdot G_2\in E_T$;
 
 \item \textbf{Signing phase.} The credential $m$ is first hashed into
   the point $U\in E$, which in our scheme is done by the method
@@ -294,7 +295,9 @@ three main steps:
   \end{itemize}
 If verification passes it means that $\sigma$ is a valid signature for
 $m$.
-\item \textbf{Proof of correctness} By using the definitions of the elements involved and exploiting the property of the pairing $e$ we have
+\item \textbf{Proof of correctness} By using the definitions of the
+  elements involved and exploiting the property of the pairing $e$ we
+  have
 \[
 \begin{split}
     e(pk,U) &= e(sk\cdot G_2, U) \\
@@ -306,11 +309,18 @@ $m$.
 
 \end{itemize}
 
-BLS signatures also support aggregation: it is possible to aggregate a collection of multiple signatures $\sigma_i$ (each one related to a different message $m_i$) into a singular new object $\sigma$, that can be validated using the respective public keys $pk_i$ in a suitable way.
+BLS signatures also support aggregation: it is possible to aggregate a
+collection of multiple signatures $\sigma_i$ (each one related to a
+different message $m_i$) into a singular new object $\sigma$, that can
+be validated using the respective public keys $pk_i$ in a suitable
+way.
 
-Since $\sigma_i\in G_1 \forall i$, the algorithm has an homomorphic property. We exploit this property to add a revocation signature into the signed credential.
+Since $\sigma_i\in G_1 \forall i$, the algorithm has an homomorphic
+property. We exploit this property to add a revocation signature into
+the signed credential.
 
-We create a new secret key $rev$ with public key $r$ and signature of the claim $\sigma_{rev}$ to add to the issuer signature:
+We create a new secret key $rev$ with public key $r$ and signature of
+the claim $\sigma_{rev}$ to add to the issuer signature:
 \begin{equation*}\label{rev_agg}
     \begin{split}
         r &= rev \cdot G_2 \\
@@ -324,25 +334,31 @@ The set of all the signed claims will be:
 \end{equation*}
 
 At the end of this phase the holder is sent the \textit{signed claims}
-to be stored in a private wallet, while the issuer stores
-a list of \textit{revocations}, associated with an identifier of the holder and the specific credential, into a private database that can be used later to
-issue revocations.
+to be stored in a private wallet, while the issuer stores a list of
+\textit{revocations}, associated with an identifier of the holder and
+the specific credential, into a private database that can be used
+later to issue revocations.
 
 
 
 \subsection{Presentation} \label{presentation}
 
-When the holder needs to disclose a particular claim $id$ it is sufficient to send the signed claim set $\{id, r, \sigma \}$.
+When the holder needs to disclose a particular claim $id$ it is
+sufficient to send the signed claim set $\{id, r, \sigma \}$.
 
 \subsection{Verification}
 
-Credential verification is made by checking the presented issuer's signature. In order to do that the credential issuer's public key must be added to the revocation public key.\\
-As explained in section \ref{presentation} we can consider the credential proof as a collection of tables of the following form:
+Credential verification is made by checking the presented issuer's
+signature. In order to do that the credential issuer's public key must
+be added to the revocation public key.\\ As explained in section
+\ref{presentation} we can consider the credential proof as a
+collection of tables of the following form:
 \begin{equation*}
     c_{id} = \{id, r, \sigma \}
 \end{equation*}
-where $\sigma$ and $r$ are respectively the signature of the string $id$ and the revocation public key.
-We can check the validity of the presented claim computing the key
+where $\sigma$ and $r$ are respectively the signature of the string
+$id$ and the revocation public key.  We can check the validity of the
+presented claim computing the key
 \begin{equation*}
     pk = A.pk + r
 \end{equation*}
@@ -370,37 +386,84 @@ Recalling the verification formula, it holds that:
 \end{equation*}
 where each equality holds for the bilinearity of the Miller loop.\\
 
-This concludes the first verification phase. If the given presentation is valid, then the verifier should proceed to check the revocation status of the credential as explained below.
+This concludes the first verification phase. If the given presentation
+is valid, then the verifier should proceed to check the revocation
+status of the credential as explained below.
 
 \subsection{Revocation}
 
-To make sure no revocation has been emitted for each credential, we update the revocation list from the issuer. A revocation list can be publicly distributed since revocation keys do not provide any information on the identity of holders, unless they are presented in a verification.
+To control if a revocation has been emitted for any credential being
+verified, we update the revocation list from the issuer. A revocation
+list can be publicly distributed since revocation keys do not provide
+any information on the identity of holders.
 
-Given an element $c_{id} = \{id, r, \sigma \}$ of the credential presentation and the Issuer public key $A.pk$, if the claim id is present in the revocation list, we can take the corresponding revocation private key $rev$.\\
-We can verify the validity of the revocation by checking if the revocation public key presented by the holder match:
+Given an element $c_{id} = \{id, r, \sigma \}$ of the credential
+presentation and the Issuer public key $A.pk$, if the claim id is
+present in the revocation list, we can take the corresponding
+revocation private key $rev$.\\ We can verify the validity of the
+revocation by checking if the revocation public key presented by the
+holder match:
 \begin{equation*}
     r = G_2 \cdot rev
 \end{equation*}
-This step, together with the signature verification, is sufficient to guarantee the revocation status.\\
-Indeed if a dishonest holder provides a wrong $r$, then the verification of the signature will fail, and the given credential is not considered valid.\\
-On the other hand to modify the revocation list in such a way that the verification is successful, the revocation secret key must be forged.\\
-If it happens that the signature verification is successful, but the key does not match, one can conclude that the revocation list has been modified by a third party.
+This step should follow the signature verification and is sufficient
+to guarantee the revocation status.
+
+If a dishonest holder provides a wrong $r$, then the verification of
+the signature will fail, and the given credential should be considered
+invalid.
+
+If it happens that the signature verification is successful and that
+the revocation key does not match, one can conclude that the
+credential is not revoked.
 
 \subsection{Threshold Revocation}
 
-In order to split responsibilities over interactive revocation we introduce an optional threshold over the revocation key, plus we split the functionality of \textit{credential issuance} from that of \textit{revocation issuance}, now operated by different peers.
+In order to split responsibilities over interactive revocation we
+introduce a threshold over the revocation key, plus we split the
+functionality of \textit{credential issuance} from that of
+\textit{revocation issuance}, now operated by different peers.
 
-This is implemented via an interactive process facilitated by a third party trustee who should be:
+This is implemented via an interactive process facilitated by a third
+party trustee, a revocation dealer, who should be:
 \begin{itemize}
     \item never entitled to publish revocations
-    \item connected to credential issuers to complete any credential signature
+    \item connected to credential issuers to complete any credential
+      signature
     \item never informed about the identity of credential holders
-    \item regularly connected to revocation issuers to distribute shares
+    \item regularly connected to revocation issuers to distribute
+      shares
 \end{itemize}
 
-Such a trustee will be in contact with \textit{credential issuers} for the signature of credentials: it will create the $rev$ revocation key while concealing it from them. The trustee then proceeds creating the $\sigma_{rev} = rev \cdot U$ revocation signature and the $r_1 = rev \cdot G_1$ projection as detailed in the issuance phase \eqref{rev_agg}. Finally the revocation trustee will distribute $\sigma_{rev}$ and $r_1$ to issuers for further processing into the final signed credential.
+Such a revocation dealer will be in contact with \textit{credential
+  issuers} for the signature of credentials: it will create the $rev$
+revocation key while concealing it from them. The trustee then
+proceeds creating the $\sigma_{rev} = rev \cdot U$ revocation
+signature and the $r = rev \cdot G_2$ public key as detailed in the
+issuance phase \eqref{rev_agg}. Finally the revocation trustee will
+distribute $\sigma_{rev}$ and $r$ to issuers for further processing
+into the final signed credential.
 
-The trustee will then proceed asynchronously to split the revocation key into shares using a public verifiable secret sharing (PVSS \cite{pvss}) implementation and distribute these shares to all revocation issuers. In order to issue a revocation, a configurable quorum of peers among the revocation issuers will need to reconstruct the secret revocation key and publish it.
+The revocation trustee (dealer) will then proceed asynchronously to
+split the revocation key into shares using a public verifiable secret
+sharing (PVSS \cite{pvss}) implementation and distribute these shares
+to all revocation issuers. In order to issue a revocation, a
+configurable quorum of peers among the revocation issuers will need to
+reconstruct the secret revocation key and publish it.
+
+This process separates responsibilities between the credential issuer
+and the revocation issuers, delegating to the revocation issuers the
+possibility to revoke a credential interactively through a collective
+process.
+
+The collection of shares can be done asynchronously and is provable.
+The dealer should publish proofs of knowledge of each revocation
+share, proving their creation and authenticity. Revocation issuers can
+also use the dealer proofs to verify the validity of the shares
+received without revealing them. Such revocation proofs will also be
+useful when revocation issuers will reconstruct a revocation, since
+they can refer to them to prove their shares are authentic without
+revealing their content.
 
 \section{Benchmarks}
 
@@ -453,8 +516,7 @@ considered secure by assuming the existence of random oracles
 Problem (DDH) \cite{DDH-problem}, the external Diffie-Hellman Problem
 (XDH), and with the Lysyanskaya-Rivest-Sahai-Wol Problem (LRSW)
 \cite{lrsw-assumption}, which are connected to the Discrete
-Logarithm. In fact, under these assumptions, we have that our protocol
-satisfies unforgeability, blindness, and unlinkability.
+Logarithm.
 
 The SD-BLS implementation we are presenting in this paper is
 demonstrated using the BLS12-381 curve \cite{bls381-12} also adopted
