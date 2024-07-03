@@ -1,4 +1,4 @@
-%  * Copyright (C) 2020-2021 Dyne.org foundation
+%  * Copyright (C) 2020-2024 Dyne.org foundation
 
 \documentclass{article}
 \pdfoutput=1
@@ -10,20 +10,6 @@
 \usepackage{arxiv}
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
-
- %\usepackage{lmodern}
- %%
- %\usepackage{mathpazo}
- %\usepackage[theoremfont]{newpxmath} \usepackage{newpxmath}
- %\usepackage{kpfonts}
- %%
- %\usepackage{mathptmx}
- %\usepackage{times,mtpro2}
- %\usepackage{stix}
- %\usepackage{txfonts}
- %\usepackage{newtxtext,newtxmath}
- %%
- %\usepackage{libertine} \usepackage[libertine]{newtxmath}
  \usepackage{libertine,libertinust1math} % added 2019/11/28
 
 
@@ -82,14 +68,14 @@
 }
 
 \renewcommand{\headeright}{Info @ Dyne.org}
-\renewcommand{\undertitle}{Privacy Preserving Selective Disclosure and Unlinkable Revocation of Verifiable Credentials}
+\renewcommand{\undertitle}{Privacy Preserving Selective Disclosure of Verifiable Credentials with Unlinkable Threshold Revocation}
 \renewcommand{\shorttitle}{\textit{SD-BLS}}
 
 \hypersetup{
-  pdftitle={SD-BLS: Privacy Preserving Selective Disclosure and Unlinkable Revocation of Verifiable Credentials},
+  pdftitle={SD-BLS: Privacy Preserving Selective Disclosure of Verifiable Credentials with Unlinkable Threshold Revocation},
   pdfsubject={cs.CR},
   pdfauthor={Denis Roio, Rebecca Selvaggini, Andrea D'Intino},
-  pdfkeywords={Privacy, Selective disclosure, BLS signatures, Digital credentials}
+  pdfkeywords={Privacy, Selective disclosure, BLS signatures, Digital credentials, Revocation}
 }
 
 \begin{document}
@@ -100,19 +86,7 @@
 \maketitle
 
 \begin{abstract}
-It is of critical importance to design digital identity systems that
-ensure the privacy of citizens as well protect them from issuer
-corruption. Unfortunately, what Europe's and USA's public sectors are
-currently developing does not offer such basic protections. Aiming at
-solving this issue, we propose a method for untraceable selective
-disclosure and privacy preserving revocation of digital credentials,
-utilizing the unique homomorphic characteristics of second order
-Elliptic Curves and Boneh-Lynn-Shacham (BLS) signatures operated on
-them. Our approach ensures that users can selectively reveal only the
-necessary credentials, while protecting their privacy across multiple
-presentations.  We also aim to protect users from issuer corruption,
-by making it possible to apply a threshold for revocation to require
-collective agreement among multiple revocation issuers.
+It is of critical importance to design digital identity systems that ensure the privacy of citizens as well as protecting them from issuer corruption. We aim to solve this issue and propose a method for selective disclosure and privacy preserving revocation of digital credentials, using the unique homomorphic characteristics of second order Elliptic Curves and Boneh-Lynn-Shacham (BLS) signatures. Our approach ensures that users can selectively reveal credentials signed by a certain issuer, which can be interactively revoked by a quorum of other agreeing issuers without revealing the identity of users. Our goal is to protect users from issuer corruption by requiring collective agreement among multiple revocation issuers.
 \end{abstract}
 
 \vspace{2cm}
